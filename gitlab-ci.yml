@@ -1,5 +1,6 @@
 stages:
   - build-and-test
+  - benchmark
 
 # Build the GraalVM CE Binary and run tests
 build-and-test-jvm-ce:
