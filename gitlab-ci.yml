@@ -18,7 +18,7 @@ build-test-benchmark:
     - bin/jt --use jvm-ce test :next
     
     # Start Benchmarking
-    - cd faststart && rebench --quick rebench.conf ruby
+    - cd faststart && rebench --quick rebench.conf
 
 
 # A full CI Run, which should be scheduled, weekly or so
