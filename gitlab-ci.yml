@@ -1,0 +1,49 @@
+build-jvm-ce:
+  stage: build
+  script:
+    - bin/jt build --env jvm-ce
+
+specs-fast:
+  stage: test
+  script:
+    - bin/jt test fast
+
+specs-next:
+  stage: test
+  script:
+    - bin/jt test :next
+
+specs-truffle:
+  stage: test
+  script:
+    - bin/jt test :truffle
+
+specs-language:
+  stage: test
+  script:
+    - bin/jt test :language
+
+specs-core:
+  stage: test
+  script:
+    - bin/jt test :core
+
+specs-library:
+  stage: test
+  script:
+    - bin/jt test :library
+
+specs-cext:
+  stage: test
+  script:
+    - bin/jt test :cext
+
+specs-security:
+  stage: test
+  script:
+    - bin/jt test :security
+
+specs-command-line:
+  stage: test
+  script:
+    - bin/jt test :command_line
