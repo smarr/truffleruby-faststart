@@ -1,49 +1,52 @@
-build-jvm-ce:
-  stage: build
+stages:
+  - build-and-test
+
+# Build the GraalVM CE Binary and run tests
+build-and-test-jvm-ce:
+  stage: build-and-test
+  tags: [yuria]
   script:
     - bin/jt build --env jvm-ce
+    
+    # Run time: 2.3min
+    - bin/jt --use jvm-ce test fast
 
-specs-fast:
-  stage: test
-  script:
-    - bin/jt test fast
+    # Run time: 2sec
+    - bin/jt --use jvm-ce test :next
 
-specs-next:
-  stage: test
-  script:
-    - bin/jt test :next
 
-specs-truffle:
-  stage: test
+# A full CI Run, which should be scheduled, weekly or so
+full-test-run-on-jvm-ce:on-schedule:
+  stage: build-and-test
+  tags: [yuria]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
   script:
-    - bin/jt test :truffle
+    - bin/jt build --env jvm-ce
+    
+    # Run time: 2.3min
+    - bin/jt --use jvm-ce test fast
 
-specs-language:
-  stage: test
-  script:
-    - bin/jt test :language
+    # Run time: 2sec
+    - bin/jt --use jvm-ce test :next
+    
+    # Run time: 21min
+    - bin/jt --use jvm-ce test :truffle
+    
+    # Run time: 6.6min
+    - bin/jt --use jvm-ce test :language
+    
+    # Run time: 21min
+    - bin/jt --use jvm-ce test :core
+    
+    # Run time: 2.5min
+    - bin/jt --use jvm-ce test :library
 
-specs-core:
-  stage: test
-  script:
-    - bin/jt test :core
+    # Run time: 2.2min
+    - bin/jt --use jvm-ce test :cext
 
-specs-library:
-  stage: test
-  script:
-    - bin/jt test :library
+    # Run time: 1min
+    - bin/jt --use jvm-ce test :security
 
-specs-cext:
-  stage: test
-  script:
-    - bin/jt test :cext
-
-specs-security:
-  stage: test
-  script:
-    - bin/jt test :security
-
-specs-command-line:
-  stage: test
-  script:
-    - bin/jt test :command_line
+    # Run time: 12min
+    - bin/jt --use jvm-ce test :command_line
