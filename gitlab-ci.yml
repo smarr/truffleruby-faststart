@@ -3,17 +3,22 @@ stages:
   - benchmark
 
 # Build the GraalVM CE Binary and run tests
-build-and-test-jvm-ce:
+build-test-benchmark:
   stage: build-and-test
   tags: [yuria]
   script:
     - bin/jt build --env jvm-ce
+    - bin/jt build --env jvm
+    - bin/jt build --env native
     
     # Run time: 2.3min
     - bin/jt --use jvm-ce test fast
 
     # Run time: 2sec
     - bin/jt --use jvm-ce test :next
+    
+    # Start Benchmarking
+    - cd faststart && rebench --quick rebench.conf ruby
 
 
 # A full CI Run, which should be scheduled, weekly or so
