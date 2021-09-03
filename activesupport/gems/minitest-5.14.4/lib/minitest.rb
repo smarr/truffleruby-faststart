@@ -128,8 +128,9 @@ module Minitest
     options = process_args args
 
     reporter = CompositeReporter.new
-    reporter << SummaryReporter.new(options[:io], options)
-    reporter << ProgressReporter.new(options[:io], options)
+    reporter << StatisticsReporter.new
+    # reporter << SummaryReporter.new(options[:io], options)
+    # reporter << ProgressReporter.new(options[:io], options)
 
     self.reporter = reporter # this makes it available to plugins
     self.init_plugins options
@@ -146,6 +147,7 @@ module Minitest
     reporter.report
 
     reporter.passed?
+    reporter
   end
 
   ##
