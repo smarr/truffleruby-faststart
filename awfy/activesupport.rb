@@ -16,13 +16,53 @@ class Activesupport < Benchmark
         :errors => 0,
         :failures => 0,
         :skips => 0
-      }
+      },
+
+      10 => {
+        :assertions => 106,
+        :count => 54,
+        :errors => 4,
+        :failures => 0,
+        :skips => 0
+      },
+
+      30 => {
+        :assertions => 1289,
+        :count => 560,
+        :errors => 16,
+        :failures => 0,
+        :skips => 0
+      },
+
+      50 => {
+        :assertions => 3150,
+        :count => 980,
+        :errors => 16,
+        :failures => 0,
+        :skips => 0
+      },
+
+      100 => {
+        :assertions => 7852,
+        :count => 2513,
+        :errors => 17,
+        :failures => 0,
+        :skips => 0
+      },
+
+      135 => {
+        :assertions => 10770,
+        :count => 3052,
+        :errors => 17,
+        :failures => 0,
+        :skips => 0
+      },
     }
     @know_tests = [
       "test/actionable_error_test.rb",
       "test/array_inquirer_test.rb",
       "test/autoload_test.rb",
-      "test/benchmarkable_test.rb",
+      # "test/benchmarkable_test.rb",
       "test/broadcast_logger_test.rb",
       "test/cache/cache_entry_test.rb",
       "test/cache/cache_key_test.rb",
@@ -128,7 +168,6 @@ class Activesupport < Benchmark
       "test/metadata/shared_metadata_tests.rb",
       "test/multibyte_chars_test.rb",
       "test/multibyte_proxy_test.rb",
-      "test/multibyte_test_helpers.rb",
       "test/notifications/evented_notification_test.rb",
       "test/notifications/instrumenter_test.rb",
       "test/notifications_test.rb",
@@ -177,7 +216,8 @@ class Activesupport < Benchmark
       return false
     end
 
-    (0...inner_iterations).each { |i| p i; p @know_tests[i]; require_relative "#{__dir__}/../activesupport/#{@know_tests[i]}" }
+    # p i; p @know_tests[i];
+    (0...inner_iterations).each { |i| require_relative "#{__dir__}/../activesupport/#{@know_tests[i]}" }
 
     reporter = Minitest.run ["--no-plugins", "--seed", "42"]
     verify_result reporter.reporters[0]
@@ -185,6 +225,15 @@ class Activesupport < Benchmark
 
   def verify_result(result)
     expected = @known_results[@inner_iterations]
+    unless expected
+      puts "No expected data configured for #{@inner_iterations}"
+      puts "assertions #{result.assertions}"
+      puts "count      #{result.count}"
+      puts "errors     #{result.errors}"
+      puts "failures   #{result.failures}"
+      puts "skips      #{result.skips}"
+      return false
+    end
 
     (expected[:assertions] == result.assertions and
       expected[:count] == result.count and
