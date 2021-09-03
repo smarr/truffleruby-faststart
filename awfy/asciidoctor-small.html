@@ -1,0 +1,1627 @@
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_introduction">1. Introduction</a></li>
+<li><a href="#X6">2. Getting Started</a>
+<ul class="sectlevel2">
+<li><a href="#_installing_asciidoc">2.1. Installing AsciiDoc</a></li>
+<li><a href="#X11">2.2. Example AsciiDoc Documents</a></li>
+</ul>
+</li>
+<li><a href="#_asciidoc_document_types">3. AsciiDoc Document Types</a>
+<ul class="sectlevel2">
+<li><a href="#_article">3.1. article</a></li>
+<li><a href="#_book">3.2. book</a></li>
+<li><a href="#_manpage">3.3. manpage</a></li>
+</ul>
+</li>
+<li><a href="#X5">4. AsciiDoc Backends</a>
+<ul class="sectlevel2">
+<li><a href="#_backend_aliases">4.1. Backend Aliases</a></li>
+<li><a href="#X100">4.2. Backend Plugins</a></li>
+</ul>
+</li>
+<li><a href="#_docbook">5. DocBook</a>
+<ul class="sectlevel2">
+<li><a href="#X12">5.1. Converting DocBook to other file formats</a></li>
+<li><a href="#X43">5.2. a2x Toolchain Wrapper</a></li>
+<li><a href="#_html_generation">5.3. HTML generation</a></li>
+<li><a href="#_pdf_generation">5.4. PDF generation</a></li>
+<li><a href="#_html_help_generation">5.5. HTML Help generation</a></li>
+<li><a href="#_toolchain_components_summary">5.6. Toolchain components summary</a></li>
+<li><a href="#_asciidoc_dblatex_configuration_files">5.7. AsciiDoc dblatex configuration files</a></li>
+<li><a href="#_asciidoc_docbook_xsl_stylesheets_drivers">5.8. AsciiDoc DocBook XSL Stylesheets drivers</a></li>
+</ul>
+</li>
+<li><a href="#_generating_plain_text_files">6. Generating Plain Text Files</a></li>
+<li><a href="#X35">7. HTML5 and XHTML 1.1</a>
+<ul class="sectlevel2">
+<li><a href="#X99">7.1. Themes</a></li>
+</ul>
+</li>
+<li><a href="#_document_structure">8. Document Structure</a>
+<ul class="sectlevel2">
+<li><a href="#_block_elements">8.1. Block Elements</a></li>
+<li><a href="#X95">8.2. Header</a></li>
+<li><a href="#X86">8.3. Preamble</a></li>
+<li><a href="#_sections">8.4. Sections</a></li>
+<li><a href="#_inline_elements">8.5. Inline Elements</a></li>
+</ul>
+</li>
+<li><a href="#_document_processing">9. Document Processing</a></li>
+<li><a href="#_text_formatting">10. Text Formatting</a>
+<ul class="sectlevel2">
+<li><a href="#X51">10.1. Quoted Text</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>AsciiDoc is a text document format for writing notes, documentation,
+articles, books, ebooks, slideshows, web pages, blogs and UNIX man
+pages.  AsciiDoc files can be translated to many formats including
+HTML, PDF, EPUB, man page.  AsciiDoc is highly configurable: both the
+AsciiDoc source file syntax and the backend output markups (which can
+be almost any type of SGML/XML markup) can be customized and extended
+by the user.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">This document</div>
+<div class="paragraph">
+<p>This is an overly large document, it probably needs to be refactored
+into a Tutorial, Quick Reference and Formal Reference.</p>
+</div>
+<div class="paragraph">
+<p>If you&#8217;re new to AsciiDoc read this section and the <a href="#X6">Getting
+Started</a> section and take a look at the example AsciiDoc (<code>*.txt</code>)
+source files in the distribution <code>doc</code> directory.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction">1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>AsciiDoc is a plain text human readable/writable document format that
+can be translated to DocBook or HTML using the asciidoc(1) command.
+You can then either use asciidoc(1) generated HTML directly or run
+asciidoc(1) DocBook output through your favorite DocBook toolchain or
+use the AsciiDoc a2x(1) toolchain wrapper to produce PDF, EPUB, DVI,
+LaTeX, PostScript, man page, HTML and text formats.</p>
+</div>
+<div class="paragraph">
+<p>The AsciiDoc format is a useful presentation format in its own right:
+AsciiDoc markup is simple, intuitive and as such is easily proofed and
+edited.</p>
+</div>
+<div class="paragraph">
+<p>AsciiDoc is light weight: it consists of a single Python script and a
+bunch of configuration files. Apart from asciidoc(1) and a Python
+interpreter, no other programs are required to convert AsciiDoc text
+files to DocBook or HTML. See <a href="#X11">Example AsciiDoc Documents</a>
+below.</p>
+</div>
+<div class="paragraph">
+<p>Text markup conventions tend to be a matter of (often strong) personal
+preference: if the default syntax is not to your liking you can define
+your own by editing the text based asciidoc(1) configuration files.
+You can also create configuration files to translate AsciiDoc
+documents to almost any SGML/XML markup.</p>
+</div>
+<div class="paragraph">
+<p>asciidoc(1) comes with a set of configuration files to translate
+AsciiDoc articles, books and man pages to HTML or DocBook backend
+formats.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">My AsciiDoc Itch</div>
+<div class="paragraph">
+<p>DocBook has emerged as the de facto standard Open Source documentation
+format. But DocBook is a complex language, the markup is difficult to
+read and even more difficult to write directly&#8201;&#8212;&#8201;I found I was
+spending more time typing markup tags, consulting reference manuals
+and fixing syntax errors, than I was writing the documentation.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="X6">2. Getting Started</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_installing_asciidoc">2.1. Installing AsciiDoc</h3>
+<div class="paragraph">
+<p>See the <code>README</code> and <code>INSTALL</code> files for install prerequisites and
+procedures. Packagers take a look at <a href="#X38">Packager Notes</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="X11">2.2. Example AsciiDoc Documents</h3>
+<div class="paragraph">
+<p>The best way to quickly get a feel for AsciiDoc is to view the
+AsciiDoc web site and/or distributed examples:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Take a look at the linked examples on the AsciiDoc web site home
+page <a href="http://asciidoc.org/" class="bare">http://asciidoc.org/</a>.  Press the <em>Page Source</em> sidebar menu item to view
+corresponding AsciiDoc source.</p>
+</li>
+<li>
+<p>Read the <code>*.txt</code> source files in the distribution <code>./doc</code> directory
+along with the corresponding HTML and DocBook XML files.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_asciidoc_document_types">3. AsciiDoc Document Types</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There are three types of AsciiDoc documents: article, book and
+manpage. All document types share the same AsciiDoc format with some
+minor variations. If you are familiar with DocBook you will have
+noticed that AsciiDoc document types correspond to the same-named
+DocBook document types.</p>
+</div>
+<div class="paragraph">
+<p>Use the asciidoc(1) <code>-d</code> (<code>--doctype</code>) option to specify the AsciiDoc
+document type&#8201;&#8212;&#8201;the default document type is <em>article</em>.</p>
+</div>
+<div class="paragraph">
+<p>By convention the <code>.txt</code> file extension is used for AsciiDoc document
+source files.</p>
+</div>
+<div class="sect2">
+<h3 id="_article">3.1. article</h3>
+<div class="paragraph">
+<p>Used for short documents, articles and general documentation.  See the
+AsciiDoc distribution <code>./doc/article.txt</code> example.</p>
+</div>
+<div class="paragraph">
+<p>AsciiDoc defines standard DocBook article frontmatter and backmatter
+<a href="#X93">section markup templates</a> (appendix, abstract, bibliography,
+glossary, index).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_book">3.2. book</h3>
+<div class="paragraph">
+<p>Books share the same format as articles, with the following
+differences:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The part titles in multi-part books are <a href="#X17">top level titles</a>
+(same level as book title).</p>
+</li>
+<li>
+<p>Some sections are book specific e.g. preface and colophon.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Book documents will normally be used to produce DocBook output since
+DocBook processors can automatically generate footnotes, table of
+contents, list of tables, list of figures, list of examples and
+indexes.</p>
+</div>
+<div class="paragraph">
+<p>AsciiDoc defines standard DocBook book frontmatter and backmatter
+<a href="#X93">section markup templates</a> (appendix, dedication, preface,
+bibliography, glossary, index, colophon).</p>
+</div>
+<div class="dlist">
+<div class="title">Example book documents</div>
+<dl>
+<dt class="hdlist1">Book</dt>
+<dd>
+<p>The <code>./doc/book.txt</code> file in the AsciiDoc distribution.</p>
+</dd>
+<dt class="hdlist1">Multi-part book</dt>
+<dd>
+<p>The <code>./doc/book-multi.txt</code> file in the AsciiDoc distribution.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_manpage">3.3. manpage</h3>
+<div class="paragraph">
+<p>Used to generate roff format UNIX manual pages.  AsciiDoc manpage
+documents observe special header title and section naming conventions&#8201;&#8212;&#8201;see the <a href="#X1">Manpage Documents</a> section for details.</p>
+</div>
+<div class="paragraph">
+<p>AsciiDoc defines the <em>synopsis</em> <a href="#X93">section markup template</a> to
+generate the DocBook <code>refsynopsisdiv</code> section.</p>
+</div>
+<div class="paragraph">
+<p>See also the asciidoc(1) man page source (<code>./doc/asciidoc.1.txt</code>) from
+the AsciiDoc distribution.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="X5">4. AsciiDoc Backends</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The asciidoc(1) command translates an AsciiDoc formatted file to the
+backend format specified by the <code>-b</code> (<code>--backend</code>) command-line
+option. asciidoc(1) itself has little intrinsic knowledge of backend
+formats, all translation rules are contained in customizable cascading
+configuration files. Backend specific attributes are listed in the
+<a href="#X88">Backend Attributes</a> section.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">docbook45</dt>
+<dd>
+<p>Outputs DocBook XML 4.5 markup.</p>
+</dd>
+<dt class="hdlist1">html4</dt>
+<dd>
+<p>This backend generates plain HTML 4.01 Transitional markup.</p>
+</dd>
+<dt class="hdlist1">xhtml11</dt>
+<dd>
+<p>This backend generates XHTML 1.1 markup styled with CSS2. Output
+files have an <code>.html</code> extension.</p>
+</dd>
+<dt class="hdlist1">html5</dt>
+<dd>
+<p>This backend generates HTML 5 markup, apart from the inclusion of
+<a href="#X98">audio and video block macros</a> it is functionally identical to
+the <em>xhtml11</em> backend.</p>
+</dd>
+<dt class="hdlist1">slidy</dt>
+<dd>
+<p>Use this backend to generate self-contained
+<a href="http://www.w3.org/Talks/Tools/Slidy2/">Slidy</a> HTML slideshows for
+your web browser from AsciiDoc documents. The Slidy backend is
+documented in the distribution <code>doc/slidy.txt</code> file and
+<a href="http://asciidoc.org/slidy.html">online</a>.</p>
+</dd>
+<dt class="hdlist1">wordpress</dt>
+<dd>
+<p>A minor variant of the <em>html4</em> backend to support
+<a href="http://srackham.wordpress.com/blogpost1/">blogpost</a>.</p>
+</dd>
+<dt class="hdlist1">latex</dt>
+<dd>
+<p>Experimental LaTeX backend.</p>
+</dd>
+</dl>
+</div>
+<div class="sect2">
+<h3 id="_backend_aliases">4.1. Backend Aliases</h3>
+<div class="paragraph">
+<p>Backend aliases are alternative names for AsciiDoc backends.  AsciiDoc
+comes with two backend aliases: <em>html</em> (aliased to <em>xhtml11</em>) and
+<em>docbook</em> (aliased to <em>docbook45</em>).</p>
+</div>
+<div class="paragraph">
+<p>You can assign (or reassign) backend aliases by setting an AsciiDoc
+attribute named like <code>backend-alias-&lt;alias&gt;</code> to an AsciiDoc backend
+name. For example, the following backend alias attribute definitions
+appear in the <code>[attributes]</code> section of the global <code>asciidoc.conf</code>
+configuration file:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>backend-alias-html=xhtml11
+backend-alias-docbook=docbook45</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="X100">4.2. Backend Plugins</h3>
+<div class="paragraph">
+<p>The asciidoc(1) <code>--backend</code> option is also used to install and manage
+backend <a href="#X101">plugins</a>.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>A backend plugin is used just like the built-in backends.</p>
+</li>
+<li>
+<p>Backend plugins <a href="#X27">take precedence</a> over built-in backends with
+the same name.</p>
+</li>
+<li>
+<p>You can use the <code>{asciidoc-confdir}</code> <a href="#X60">intrinsic attribute</a> to
+refer to the built-in backend configuration file location from
+backend plugin configuration files.</p>
+</li>
+<li>
+<p>You can use the <code>{backend-confdir}</code> <a href="#X60">intrinsic attribute</a> to
+refer to the backend plugin configuration file location.</p>
+</li>
+<li>
+<p>By default backends plugins are installed in
+<code>$HOME/.asciidoc/backends/&lt;backend&gt;</code> where <code>&lt;backend&gt;</code> is the
+backend name.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_docbook">5. DocBook</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>AsciiDoc generates <em>article</em>, <em>book</em> and <em>refentry</em>
+<a href="http://www.docbook.org/">DocBook</a> documents (corresponding to the
+AsciiDoc <em>article</em>, <em>book</em> and <em>manpage</em> document types).</p>
+</div>
+<div class="paragraph">
+<p>Most Linux distributions come with conversion tools (collectively
+called a toolchain) for <a href="#X12">converting DocBook files</a> to
+presentation formats such as Postscript, HTML, PDF, EPUB, DVI,
+PostScript, LaTeX, roff (the native man page format), HTMLHelp,
+JavaHelp and text.  There are also programs that allow you to view
+DocBook files directly, for example <a href="http://live.gnome.org/Yelp">Yelp</a>
+(the GNOME help viewer).</p>
+</div>
+<div class="sect2">
+<h3 id="X12">5.1. Converting DocBook to other file formats</h3>
+<div class="paragraph">
+<p>DocBook files are validated, parsed and translated various
+presentation file formats using a combination of applications
+collectively called a DocBook <em>tool chain</em>. The function of a tool
+chain is to read the DocBook markup (produced by AsciiDoc) and
+transform it to a presentation format (for example HTML, PDF, HTML
+Help, EPUB, DVI, PostScript, LaTeX).</p>
+</div>
+<div class="paragraph">
+<p>A wide range of user output format requirements coupled with a choice
+of available tools and stylesheets results in many valid tool chain
+combinations.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="X43">5.2. a2x Toolchain Wrapper</h3>
+<div class="paragraph">
+<p>One of the biggest hurdles for new users is installing, configuring
+and using a DocBook XML toolchain. <code>a2x(1)</code> can help&#8201;&#8212;&#8201;it&#8217;s a
+toolchain wrapper command that will generate XHTML (chunked and
+unchunked), PDF, EPUB, DVI, PS, LaTeX, man page, HTML Help and text
+file outputs from an AsciiDoc text file.  <code>a2x(1)</code> does all the grunt
+work associated with generating and sequencing the toolchain commands
+and managing intermediate and output files.  <code>a2x(1)</code> also optionally
+deploys admonition and navigation icons and a CSS stylesheet. See the
+<code>a2x(1)</code> man page for more details. In addition to <code>asciidoc(1)</code> you
+also need <a href="#X40">xsltproc(1)</a>, <a href="#X13">DocBook XSL Stylesheets</a> and
+optionally: <a href="#X31">dblatex</a> or <a href="#X14">FOP</a> (to generate PDF);
+<code>w3m(1)</code> or <code>lynx(1)</code> (to generate text).</p>
+</div>
+<div class="paragraph">
+<p>The following examples generate <code>doc/source-highlight-filter.pdf</code> from
+the AsciiDoc <code>doc/source-highlight-filter.txt</code> source file. The first
+example uses <code>dblatex(1)</code> (the default PDF generator) the second
+example forces FOP to be used:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ a2x -f pdf doc/source-highlight-filter.txt
+$ a2x -f pdf --fop doc/source-highlight-filter.txt</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>See the <code>a2x(1)</code> man page for details.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Use the <code>--verbose</code> command-line option to view executed
+toolchain commands.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_html_generation">5.3. HTML generation</h3>
+<div class="paragraph">
+<p>AsciiDoc produces nicely styled HTML directly without requiring a
+DocBook toolchain but there are also advantages in going the DocBook
+route:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>HTML from DocBook can optionally include automatically generated
+indexes, tables of contents, footnotes, lists of figures and tables.</p>
+</li>
+<li>
+<p>DocBook toolchains can also (optionally) generate separate (chunked)
+linked HTML pages for each document section.</p>
+</li>
+<li>
+<p>Toolchain processing performs link and document validity checks.</p>
+</li>
+<li>
+<p>If the DocBook <em>lang</em> attribute is set then things like table of
+contents, figure and table captions and admonition captions will be
+output in the specified language (setting the AsciiDoc <em>lang</em>
+attribute sets the DocBook <em>lang</em> attribute).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>On the other hand, HTML output directly from AsciiDoc is much faster,
+is easily customized and can be used in situations where there is no
+suitable DocBook toolchain (for example, see the <a href="http://asciidoc.org/">AsciiDoc
+website</a>).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_pdf_generation">5.4. PDF generation</h3>
+<div class="paragraph">
+<p>There are two commonly used tools to generate PDFs from DocBook,
+<a href="#X31">dblatex</a> and <a href="#X14">FOP</a>.</p>
+</div>
+<div class="ulist">
+<div class="title">dblatex or FOP?</div>
+<ul>
+<li>
+<p><em>dblatex</em> is easier to install, there&#8217;s zero configuration
+required and no Java VM to install&#8201;&#8212;&#8201;it just works out of the box.</p>
+</li>
+<li>
+<p><em>dblatex</em> source code highlighting and numbering is superb.</p>
+</li>
+<li>
+<p><em>dblatex</em> is easier to use as it converts DocBook directly to PDF
+whereas before using <em>FOP</em> you have to convert DocBook to XML-FO
+using <a href="#X13">DocBook XSL Stylesheets</a>.</p>
+</li>
+<li>
+<p><em>FOP</em> is more feature complete (for example, callouts are processed
+inside literal layouts) and arguably produces nicer looking output.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_html_help_generation">5.5. HTML Help generation</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Convert DocBook XML documents to HTML Help compiler source files
+using <a href="#X13">DocBook XSL Stylesheets</a> and <a href="#X40">xsltproc(1)</a>.</p>
+</li>
+<li>
+<p>Convert the HTML Help source (<code>.hhp</code> and <code>.html</code>) files to HTML Help
+(<code>.chm</code>) files using the <a href="#X67">Microsoft HTML Help Compiler</a>.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_toolchain_components_summary">5.6. Toolchain components summary</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">AsciiDoc</dt>
+<dd>
+<p>Converts AsciiDoc (<code>.txt</code>) files to DocBook XML (<code>.xml</code>) files.</p>
+</dd>
+<dt class="hdlist1"><a id="X13"></a><a href="http://docbook.sourceforge.net/projects/xsl/">DocBook XSL Stylesheets</a></dt>
+<dd>
+<p>These are a set of XSL stylesheets containing rules for converting
+DocBook XML documents to HTML, XSL-FO, manpage and HTML Help files.
+The stylesheets are used in conjunction with an XML parser such as
+<a href="#X40">xsltproc(1)</a>.</p>
+</dd>
+<dt class="hdlist1"><a id="X40"></a><a href="http://www.xmlsoft.org">xsltproc</a></dt>
+<dd>
+<p>An XML parser for applying XSLT stylesheets (in our case the
+<a href="#X13">DocBook XSL Stylesheets</a>) to XML documents.</p>
+</dd>
+<dt class="hdlist1"><a id="X31"></a><a href="http://dblatex.sourceforge.net/">dblatex</a></dt>
+<dd>
+<p>Generates PDF, DVI, PostScript and LaTeX formats directly from
+DocBook source via the intermediate LaTeX typesetting language&#8201;&#8212;&#8201;uses <a href="#X13">DocBook XSL Stylesheets</a>, <a href="#X40">xsltproc(1)</a> and
+<code>latex(1)</code>.</p>
+</dd>
+<dt class="hdlist1"><a id="X14"></a><a href="http://xml.apache.org/fop/">FOP</a></dt>
+<dd>
+<p>The Apache Formatting Objects Processor converts XSL-FO (<code>.fo</code>)
+files to PDF files.  The XSL-FO files are generated from DocBook
+source files using <a href="#X13">DocBook XSL Stylesheets</a> and
+<a href="#X40">xsltproc(1)</a>.</p>
+</dd>
+<dt class="hdlist1"><a id="X67"></a>Microsoft Help Compiler</dt>
+<dd>
+<p>The Microsoft HTML Help Compiler (<code>hhc.exe</code>) is a command-line tool
+that converts HTML Help source files to a single HTML Help (<code>.chm</code>)
+file. It runs on MS Windows platforms and can be downloaded from
+<a href="http://www.microsoft.com" class="bare">http://www.microsoft.com</a>.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_asciidoc_dblatex_configuration_files">5.7. AsciiDoc dblatex configuration files</h3>
+<div class="paragraph">
+<p>The AsciiDoc distribution <code>./dblatex</code> directory contains
+<code>asciidoc-dblatex.xsl</code> (customized XSL parameter settings) and
+<code>asciidoc-dblatex.sty</code> (customized LaTeX settings). These are examples
+of optional <a href="#X31">dblatex</a> output customization and are used by
+<a href="#X43">a2x(1)</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_asciidoc_docbook_xsl_stylesheets_drivers">5.8. AsciiDoc DocBook XSL Stylesheets drivers</h3>
+<div class="paragraph">
+<p>You will have noticed that the distributed HTML and HTML Help
+documentation files (for example <code>./doc/asciidoc.html</code>) are not the
+plain outputs produced using the default <em>DocBook XSL Stylesheets</em>
+configuration.  This is because they have been processed using
+customized DocBook XSL Stylesheets along with (in the case of HTML
+outputs) the custom <code>./stylesheets/docbook-xsl.css</code> CSS stylesheet.</p>
+</div>
+<div class="paragraph">
+<p>You&#8217;ll find the customized DocBook XSL drivers along with additional
+documentation in the distribution <code>./docbook-xsl</code> directory. The
+examples that follow are executed from the distribution documentation
+(<code>./doc</code>) directory. These drivers are also used by <a href="#X43">a2x(1)</a>.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>common.xsl</code></dt>
+<dd>
+<p>Shared driver parameters.  This file is not used directly but is
+included in all the following drivers.</p>
+</dd>
+<dt class="hdlist1"><code>chunked.xsl</code></dt>
+<dd>
+<p>Generate chunked XHTML (separate HTML pages for each document
+section) in the <code>./doc/chunked</code> directory. For example:</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ python ../asciidoc.py -b docbook asciidoc.txt
+$ xsltproc --nonet ../docbook-xsl/chunked.xsl asciidoc.xml</pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1"><code>epub.xsl</code></dt>
+<dd>
+<p>Used by <a href="#X43">a2x(1)</a> to generate EPUB formatted documents.</p>
+</dd>
+<dt class="hdlist1"><code>fo.xsl</code></dt>
+<dd>
+<p>Generate XSL Formatting Object (<code>.fo</code>) files for subsequent PDF
+file generation using FOP. For example:</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ python ../asciidoc.py -b docbook article.txt
+$ xsltproc --nonet ../docbook-xsl/fo.xsl article.xml &gt; article.fo
+$ fop article.fo article.pdf</pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1"><code>htmlhelp.xsl</code></dt>
+<dd>
+<p>Generate Microsoft HTML Help source files for the MS HTML Help
+Compiler in the <code>./doc/htmlhelp</code> directory. This example is run on
+MS Windows from a Cygwin shell prompt:</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ python ../asciidoc.py -b docbook asciidoc.txt
+$ xsltproc --nonet ../docbook-xsl/htmlhelp.xsl asciidoc.xml
+$ c:/Program\ Files/HTML\ Help\ Workshop/hhc.exe htmlhelp.hhp</pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1"><code>manpage.xsl</code></dt>
+<dd>
+<p>Generate a <code>roff(1)</code> format UNIX man page from a DocBook XML
+<em>refentry</em> document. This example generates an <code>asciidoc.1</code> man
+page file:</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ python ../asciidoc.py -d manpage -b docbook asciidoc.1.txt
+$ xsltproc --nonet ../docbook-xsl/manpage.xsl asciidoc.1.xml</pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1"><code>xhtml.xsl</code></dt>
+<dd>
+<p>Convert a DocBook XML file to a single XHTML file. For example:</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ python ../asciidoc.py -b docbook asciidoc.txt
+$ xsltproc --nonet ../docbook-xsl/xhtml.xsl asciidoc.xml &gt; asciidoc.html</pre>
+</div>
+</div>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>If you want to see how the complete documentation set is processed
+take a look at the A-A-P script <code>./doc/main.aap</code>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_generating_plain_text_files">6. Generating Plain Text Files</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>AsciiDoc does not have a text backend (for most purposes AsciiDoc
+source text is fine), however you can convert AsciiDoc text files to
+formatted text using the AsciiDoc <a href="#X43">a2x(1)</a> toolchain wrapper
+utility.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="X35">7. HTML5 and XHTML 1.1</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <em>xhtml11</em> and <em>html5</em> backends embed or link CSS and JavaScript
+files in their outputs, there is also a <a href="#X99">themes</a> plugin
+framework.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>If the AsciiDoc <em>linkcss</em> attribute is defined then CSS and
+JavaScript files are linked to the output document, otherwise they
+are embedded (the default behavior).</p>
+</li>
+<li>
+<p>The default locations for CSS and JavaScript files can be changed by
+setting the AsciiDoc <em>stylesdir</em> and <em>scriptsdir</em> attributes
+respectively.</p>
+</li>
+<li>
+<p>The default locations for embedded and linked files differ and are
+calculated at different times&#8201;&#8212;&#8201;embedded files are loaded when
+asciidoc(1) generates the output document, linked files are loaded
+by the browser when the user views the output document.</p>
+</li>
+<li>
+<p>Embedded files are automatically inserted in the output files but
+you need to manually copy linked CSS and Javascript files from
+AsciiDoc <a href="#X27">configuration directories</a> to the correct location
+relative to the output document.</p>
+</li>
+</ul>
+</div>
+<table class="tableblock frame-topbot grid-all spread">
+<caption class="title">Table 1. Stylesheet file locations</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top"><em>stylesdir</em> attribute</th>
+<th class="tableblock halign-left valign-top">Linked location (<em>linkcss</em> attribute defined)</th>
+<th class="tableblock halign-left valign-top">Embedded location (<em>linkcss</em> attribute undefined)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Undefined (default).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Same directory as the output document.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>stylesheets</code> subdirectory in the AsciiDoc configuration directory
+(the directory containing the backend conf file).</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Absolute or relative directory name.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Absolute or relative to the output document.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Absolute or relative to the AsciiDoc configuration directory (the
+directory containing the backend conf file).</p></td>
+</tr>
+</tbody>
+</table>
+<table class="tableblock frame-topbot grid-all spread">
+<caption class="title">Table 2. JavaScript file locations</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top"><em>scriptsdir</em> attribute</th>
+<th class="tableblock halign-left valign-top">Linked location (<em>linkcss</em> attribute defined)</th>
+<th class="tableblock halign-left valign-top">Embedded location (<em>linkcss</em> attribute undefined)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Undefined (default).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Same directory as the output document.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>javascripts</code> subdirectory in the AsciiDoc configuration directory
+(the directory containing the backend conf file).</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Absolute or relative directory name.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Absolute or relative to the output document.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Absolute or relative to the AsciiDoc configuration directory (the
+directory containing the backend conf file).</p></td>
+</tr>
+</tbody>
+</table>
+<div class="sect2">
+<h3 id="X99">7.1. Themes</h3>
+<div class="paragraph">
+<p>The AsciiDoc <em>theme</em> attribute is used to select an alternative CSS
+stylesheet and to optionally include additional JavaScript code.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Theme files reside in an AsciiDoc <a href="#X27">configuration directory</a>
+named <code>themes/&lt;theme&gt;/</code> (where <code>&lt;theme&gt;</code> is the the theme name set
+by the <em>theme</em> attribute). asciidoc(1) sets the <em>themedir</em> attribute
+to the theme directory path name.</p>
+</li>
+<li>
+<p>The <em>theme</em> attribute can also be set using the asciidoc(1)
+<code>--theme</code> option, the <code>--theme</code> option can also be used to manage
+theme <a href="#X101">plugins</a>.</p>
+</li>
+<li>
+<p>AsciiDoc ships with two themes: <em>flask</em> and <em>volnitsky</em>.</p>
+</li>
+<li>
+<p>The <code>&lt;theme&gt;.css</code> file replaces the default <code>asciidoc.css</code> CSS file.</p>
+</li>
+<li>
+<p>The <code>&lt;theme&gt;.js</code> file is included in addition to the default
+<code>asciidoc.js</code> JavaScript file.</p>
+</li>
+<li>
+<p>If the <a href="#X66">data-uri</a> attribute is defined then icons are loaded
+from the theme <code>icons</code> sub-directory if it exists (i.e.  the
+<em>iconsdir</em> attribute is set to theme <code>icons</code> sub-directory path).</p>
+</li>
+<li>
+<p>Embedded theme files are automatically inserted in the output files
+but you need to manually copy linked CSS and Javascript files to the
+location of the output documents.</p>
+</li>
+<li>
+<p>Linked CSS and JavaScript theme files are linked to the same linked
+locations as <a href="#X35">other CSS and JavaScript files</a>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For example, the command-line option <code>--theme foo</code> (or <code>--attribute
+theme=foo</code>) will cause asciidoc(1) to search <a href="#X27">configuration
+file locations 1, 2 and 3</a> for a sub-directory called <code>themes/foo</code>
+containing the stylesheet <code>foo.css</code> and optionally a JavaScript file
+name <code>foo.js</code>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_document_structure">8. Document Structure</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>An AsciiDoc document consists of a series of <a href="#X8">block elements</a>
+starting with an optional document Header, followed by an optional
+Preamble, followed by zero or more document Sections.</p>
+</div>
+<div class="paragraph">
+<p>Almost any combination of zero or more elements constitutes a valid
+AsciiDoc document: documents can range from a single sentence to a
+multi-part book.</p>
+</div>
+<div class="sect2">
+<h3 id="_block_elements">8.1. Block Elements</h3>
+<div class="paragraph">
+<p>Block elements consist of one or more lines of text and may contain
+other block elements.</p>
+</div>
+<div class="paragraph">
+<p>The AsciiDoc block structure can be informally summarized as follows
+<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnote_1" title="View footnote.">1</a>]</sup>:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Document      ::= (Header?,Preamble?,Section*)
+Header        ::= (Title,(AuthorInfo,RevisionInfo?)?)
+AuthorInfo    ::= (FirstName,(MiddleName?,LastName)?,EmailAddress?)
+RevisionInfo  ::= (RevisionNumber?,RevisionDate,RevisionRemark?)
+Preamble      ::= (SectionBody)
+Section       ::= (Title,SectionBody?,(Section)*)
+SectionBody   ::= ((BlockTitle?,Block)|BlockMacro)+
+Block         ::= (Paragraph|DelimitedBlock|List|Table)
+List          ::= (BulletedList|NumberedList|LabeledList|CalloutList)
+BulletedList  ::= (ListItem)+
+NumberedList  ::= (ListItem)+
+CalloutList   ::= (ListItem)+
+LabeledList   ::= (ListEntry)+
+ListEntry     ::= (ListLabel,ListItem)
+ListLabel     ::= (ListTerm+)
+ListItem      ::= (ItemText,(List|ListParagraph|ListContinuation)*)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Where:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><em>?</em> implies zero or one occurrence, <em>+</em> implies one or more
+occurrences, <em>*</em> implies zero or more occurrences.</p>
+</li>
+<li>
+<p>All block elements are separated by line boundaries.</p>
+</li>
+<li>
+<p><code>BlockId</code>, <code>AttributeEntry</code> and <code>AttributeList</code> block elements (not
+shown) can occur almost anywhere.</p>
+</li>
+<li>
+<p>There are a number of document type and backend specific
+restrictions imposed on the block syntax.</p>
+</li>
+<li>
+<p>The following elements cannot contain blank lines: Header, Title,
+Paragraph, ItemText.</p>
+</li>
+<li>
+<p>A ListParagraph is a Paragraph with its <em>listelement</em> option set.</p>
+</li>
+<li>
+<p>A ListContinuation is a <a href="#X15">list continuation element</a>.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="X95">8.2. Header</h3>
+<div class="paragraph">
+<p>The Header contains document meta-data, typically title plus optional
+authorship and revision information:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The Header is optional, but if it is used it must start with a
+document <a href="#X17">title</a>.</p>
+</li>
+<li>
+<p>Optional Author and Revision information immediately follows the
+header title.</p>
+</li>
+<li>
+<p>The document header must be separated from the remainder of the
+document by one or more blank lines and cannot contain blank lines.</p>
+</li>
+<li>
+<p>The header can include comments.</p>
+</li>
+<li>
+<p>The header can include <a href="#X18">attribute entries</a>, typically
+<em>doctype</em>, <em>lang</em>, <em>encoding</em>, <em>icons</em>, <em>data-uri</em>, <em>toc</em>,
+<em>numbered</em>.</p>
+</li>
+<li>
+<p>Header attributes are overridden by command-line attributes.</p>
+</li>
+<li>
+<p>If the header contains non-UTF-8 characters then the <em>encoding</em> must
+precede the header (either in the document or on the command-line).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s an example AsciiDoc document header:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Writing Documentation using AsciiDoc
+====================================
+Joe Bloggs &lt;jbloggs@mymail.com&gt;
+v2.0, February 2003:
+Rewritten for version 2 release.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The author information line contains the author&#8217;s name optionally
+followed by the author&#8217;s email address. The author&#8217;s name is formatted
+like:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>firstname[ [middlename ]lastname][ &lt;email&gt;]]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>i.e. a first name followed by optional middle and last names followed
+by an email address in that order.  Multi-word first, middle and last
+names can be entered using the underscore as a word separator.  The
+email address comes last and must be enclosed in angle &lt;&gt; brackets.
+Here a some examples of author information lines:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Joe Bloggs &lt;jbloggs@mymail.com&gt;
+Joe Bloggs
+Vincent Willem van_Gogh</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the author line does not match the above specification then the
+entire author line is treated as the first name.</p>
+</div>
+<div class="paragraph">
+<p>The optional revision information line follows the author information
+line. The revision information can be one of two formats:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>An optional document revision number followed by an optional
+revision date followed by an optional revision remark:</p>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>If the revision number is specified it must be followed by a
+comma.</p>
+</li>
+<li>
+<p>The revision number must contain at least one numeric character.</p>
+</li>
+<li>
+<p>Any non-numeric characters preceding the first numeric character
+will be dropped.</p>
+</li>
+<li>
+<p>If a revision remark is specified it must be preceded by a colon.
+The revision remark extends from the colon up to the next blank
+line, attribute entry or comment and is subject to normal text
+substitutions.</p>
+</li>
+<li>
+<p>If a revision number or remark has been set but the revision date
+has not been set then the revision date is set to the value of the
+<em>docdate</em> attribute.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Examples:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>v2.0, February 2003
+February 2003
+v2.0,
+v2.0, February 2003: Rewritten for version 2 release.
+February 2003: Rewritten for version 2 release.
+v2.0,: Rewritten for version 2 release.
+:Rewritten for version 2 release.</pre>
+</div>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p>The revision information line can also be an RCS/CVS/SVN $Id$
+marker:</p>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>AsciiDoc extracts the <em>revnumber</em>, <em>revdate</em>, and <em>author</em>
+attributes from the $Id$ revision marker and displays them in the
+document header.</p>
+</li>
+<li>
+<p>If an $Id$ revision marker is used the header author line can be
+omitted.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Example:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$Id: mydoc.txt,v 1.5 2009/05/17 17:58:44 jbloggs Exp $</pre>
+</div>
+</div>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>You can override or set header parameters by passing <em>revnumber</em>,
+<em>revremark</em>, <em>revdate</em>, <em>email</em>, <em>author</em>, <em>authorinitials</em>,
+<em>firstname</em> and <em>lastname</em> attributes using the asciidoc(1) <code>-a</code>
+(<code>--attribute</code>) command-line option. For example:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ asciidoc -a revdate=2004/07/27 article.txt</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Attribute entries can also be added to the header for substitution in
+the header template with <a href="#X18">Attribute Entry</a> elements.</p>
+</div>
+<div class="paragraph">
+<p>The <em>title</em> element in HTML outputs is set to the AsciiDoc document
+title, you can set it to a different value by including a <em>title</em>
+attribute entry in the document header.</p>
+</div>
+<div class="sect3">
+<h4 id="X87">8.2.1. Additional document header information</h4>
+<div class="paragraph">
+<p>AsciiDoc has two mechanisms for optionally including additional
+meta-data in the header of the output document:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><em>docinfo</em> configuration file sections</dt>
+<dd>
+<p>If a <a href="#X7">configuration file</a> section named <em>docinfo</em> has been loaded
+then it will be included in the document header. Typically the
+<em>docinfo</em> section name will be prefixed with a <em>+</em> character so that it
+is appended to (rather than replace) other <em>docinfo</em> sections.</p>
+</dd>
+<dt class="hdlist1"><em>docinfo</em> files</dt>
+<dd>
+<p>Two docinfo files are recognized: one named <code>docinfo</code> and a second
+named like the AsciiDoc source file with a <code>-docinfo</code> suffix.  For
+example, if the source document is called <code>mydoc.txt</code> then the
+document information files would be <code>docinfo.xml</code> and
+<code>mydoc-docinfo.xml</code> (for DocBook outputs) and <code>docinfo.html</code> and
+<code>mydoc-docinfo.html</code> (for HTML outputs).  The <a href="#X97">docinfo, docinfo1
+and docinfo2</a> attributes control which docinfo files are included in
+the output files.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>The contents docinfo templates and files is dependent on the type of
+output:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">HTML</dt>
+<dd>
+<p>Valid <em>head</em> child elements. Typically <em>style</em> and <em>script</em> elements
+for CSS and JavaScript inclusion.</p>
+</dd>
+<dt class="hdlist1">DocBook</dt>
+<dd>
+<p>Valid <em>articleinfo</em> or <em>bookinfo</em> child elements.  DocBook defines
+numerous elements for document meta-data, for example: copyrights,
+document history and authorship information.  See the DocBook
+<code>./doc/article-docinfo.xml</code> example that comes with the AsciiDoc
+distribution.  The rendering of meta-data elements (or not) is
+DocBook processor dependent.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="X86">8.3. Preamble</h3>
+<div class="paragraph">
+<p>The Preamble is an optional untitled section body between the document
+Header and the first Section title.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sections">8.4. Sections</h3>
+<div class="paragraph">
+<p>In addition to the document title (level 0), AsciiDoc supports four
+section levels: 1 (top) to 4 (bottom).  Section levels are delimited
+by section <a href="#X17">titles</a>.  Sections are translated using
+configuration file <a href="#X93">section markup templates</a>. AsciiDoc
+generates the following <a href="#X60">intrinsic attributes</a> specifically for
+use in section markup templates:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">level</dt>
+<dd>
+<p>The <code>level</code> attribute is the section level number, it is normally just
+the <a href="#X17">title</a> level number (1..4). However, if the <code>leveloffset</code>
+attribute is defined it will be added to the <code>level</code> attribute. The
+<code>leveloffset</code> attribute is useful for <a href="#X90">combining documents</a>.</p>
+</dd>
+<dt class="hdlist1">sectnum</dt>
+<dd>
+<p>The <code>-n</code> (<code>--section-numbers</code>) command-line option generates the
+<code>sectnum</code> (section number) attribute.  The <code>sectnum</code> attribute is used
+for section numbers in HTML outputs (DocBook section numbering are
+handled automatically by the DocBook toolchain commands).</p>
+</dd>
+</dl>
+</div>
+<div class="sect3">
+<h4 id="X93">8.4.1. Section markup templates</h4>
+<div class="paragraph">
+<p>Section markup templates specify output markup and are defined in
+AsciiDoc configuration files.  Section markup template names are
+derived as follows (in order of precedence):</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>From the title&#8217;s first positional attribute or <em>template</em>
+attribute. For example, the following three section titles are
+functionally equivalent:</p>
+<div class="literalblock">
+<div class="content">
+<pre>[[terms]]
+[glossary]
+List of Terms
+-------------
+
+["glossary",id="terms"]
+List of Terms
+-------------
+
+[template="glossary",id="terms"]
+List of Terms
+-------------</pre>
+</div>
+</div>
+</li>
+<li>
+<p>When the title text matches a configuration file
+<a href="#X16"><code>[specialsections]</code></a> entry.</p>
+</li>
+<li>
+<p>If neither of the above the default <code>sect&lt;level&gt;</code> template is used
+(where <code>&lt;level&gt;</code> is a number from 1 to 4).</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>In addition to the normal section template names (<em>sect1</em>, <em>sect2</em>,
+<em>sect3</em>, <em>sect4</em>) AsciiDoc has the following templates for
+frontmatter, backmatter and other special sections: <em>abstract</em>,
+<em>preface</em>, <em>colophon</em>, <em>dedication</em>, <em>glossary</em>, <em>bibliography</em>,
+<em>synopsis</em>, <em>appendix</em>, <em>index</em>.  These special section templates
+generate the corresponding Docbook elements; for HTML outputs they
+default to the <em>sect1</em> section template.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_section_ids">8.4.2. Section IDs</h4>
+<div class="paragraph">
+<p>If no explicit section ID is specified an ID will be synthesised from
+the section title.  The primary purpose of this feature is to ensure
+persistence of table of contents links (permalinks): the missing
+section IDs are generated dynamically by the JavaScript TOC generator
+<strong>after</strong> the page is loaded. If you link to a dynamically generated TOC
+address the page will load but the browser will ignore the (as yet
+ungenerated) section ID.</p>
+</div>
+<div class="paragraph">
+<p>The IDs are generated by the following algorithm:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Replace all non-alphanumeric title characters with underscores.</p>
+</li>
+<li>
+<p>Strip leading or trailing underscores.</p>
+</li>
+<li>
+<p>Convert to lowercase.</p>
+</li>
+<li>
+<p>Prepend the <code>idprefix</code> attribute (so there&#8217;s no possibility of name
+clashes with existing document IDs). Prepend an underscore if the
+<code>idprefix</code> attribute is not defined.</p>
+</li>
+<li>
+<p>A numbered suffix (<code>_2</code>, <code>_3</code> &#8230;&#8203;) is added if a same named
+auto-generated section ID exists.</p>
+</li>
+<li>
+<p>If the <code>ascii-ids</code> attribute is defined then non-ASCII characters
+are replaced with ASCII equivalents. This attribute may be
+deprecated in future releases and <strong>should be avoided</strong>, it&#8217;s sole
+purpose is to accommodate deficient downstream applications that
+cannot process non-ASCII ID attributes.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Example: the title <em>Jim&#8217;s House</em> would generate the ID <code>_jim_s_house</code>.</p>
+</div>
+<div class="paragraph">
+<p>Section ID synthesis can be disabled by undefining the <code>sectids</code>
+attribute.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="X16">8.4.3. Special Section Titles</h4>
+<div class="paragraph">
+<p>AsciiDoc has a mechanism for mapping predefined section titles
+auto-magically to specific markup templates. For example a title
+<em>Appendix A: Code Reference</em> will automatically use the <em>appendix</em>
+<a href="#X93">section markup template</a>. The mappings from title to template
+name are specified in <code>[specialsections]</code> sections in the Asciidoc
+language configuration files (<code>lang-*.conf</code>).  Section entries are
+formatted like:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;title&gt;=&lt;template&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>&lt;title&gt;</code> is a Python regular expression and <code>&lt;template&gt;</code> is the name
+of a configuration file markup template section. If the <code>&lt;title&gt;</code>
+matches an AsciiDoc document section title then the backend output is
+marked up using the <code>&lt;template&gt;</code> markup template (instead of the
+default <code>sect&lt;level&gt;</code> section template). The <code>{title}</code> attribute value
+is set to the value of the matched regular expression group named
+<em>title</em>, if there is no <em>title</em> group <code>{title}</code> defaults to the whole
+of the AsciiDoc section title. If <code>&lt;template&gt;</code> is blank then any
+existing entry with the same <code>&lt;title&gt;</code> will be deleted.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Special section titles vs. explicit template names</div>
+<div class="paragraph">
+<p>AsciiDoc has two mechanisms for specifying non-default section markup
+templates: you can specify the template name explicitly (using the
+<em>template</em> attribute) or indirectly (using <em>special section titles</em>).
+Specifying a <a href="#X93">section template</a> attribute explicitly is
+preferred.  Auto-magical <em>special section titles</em> have the following
+drawbacks:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>They are non-obvious, you have to know the exact matching
+title for each special section on a language by language basis.</p>
+</li>
+<li>
+<p>Section titles are predefined and can only be customised with a
+configuration change.</p>
+</li>
+<li>
+<p>The implementation is complicated by multiple languages: every
+special section title has to be defined for each language (in each
+of the <code>lang-*.conf</code> files).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Specifying special section template names explicitly does add more
+noise to the source document (the <em>template</em> attribute declaration),
+but the intention is obvious and the syntax is consistent with other
+AsciiDoc elements c.f.  bibliographic, Q&amp;A and glossary lists.</p>
+</div>
+<div class="paragraph">
+<p>Special section titles have been deprecated but are retained for
+backward compatibility.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_inline_elements">8.5. Inline Elements</h3>
+<div class="paragraph">
+<p><a href="#X34">Inline document elements</a> are used to format text and to
+perform various types of text substitution. Inline elements and inline
+element syntax is defined in the asciidoc(1) configuration files.</p>
+</div>
+<div class="paragraph">
+<p>Here is a list of AsciiDoc inline elements in the (default) order in
+which they are processed:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Special characters</dt>
+<dd>
+<p>These character sequences escape special characters used by
+the backend markup (typically <code>&lt;</code>, <code>&gt;</code>, and <code>&amp;</code> characters).
+See <code>[specialcharacters]</code> configuration file sections.</p>
+</dd>
+<dt class="hdlist1">Quotes</dt>
+<dd>
+<p>Elements that markup words and phrases; usually for character
+formatting. See <code>[quotes]</code> configuration file sections.</p>
+</dd>
+<dt class="hdlist1">Special Words</dt>
+<dd>
+<p>Word or word phrase patterns singled out for markup without
+the need for further annotation.  See <code>[specialwords]</code>
+configuration file sections.</p>
+</dd>
+<dt class="hdlist1">Replacements</dt>
+<dd>
+<p>Each replacement defines a word or word phrase pattern to
+search for along with corresponding replacement text. See
+<code>[replacements]</code> configuration file sections.</p>
+</dd>
+<dt class="hdlist1">Attribute references</dt>
+<dd>
+<p>Document attribute names enclosed in braces are replaced by
+the corresponding attribute value.</p>
+</dd>
+<dt class="hdlist1">Inline Macros</dt>
+<dd>
+<p>Inline macros are replaced by the contents of parametrized
+configuration file sections.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_document_processing">9. Document Processing</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The AsciiDoc source document is read and processed as follows:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>The document <em>Header</em> is parsed, header parameter values are
+substituted into the configuration file <code>[header]</code> template section
+which is then written to the output file.</p>
+</li>
+<li>
+<p>Each document <em>Section</em> is processed and its constituent elements
+translated to the output file.</p>
+</li>
+<li>
+<p>The configuration file <code>[footer]</code> template section is substituted
+and written to the output file.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>When a block element is encountered asciidoc(1) determines the type of
+block by checking in the following order (first to last): (section)
+Titles, BlockMacros, Lists, DelimitedBlocks, Tables, AttributeEntrys,
+AttributeLists, BlockTitles, Paragraphs.</p>
+</div>
+<div class="paragraph">
+<p>The default paragraph definition <code>[paradef-default]</code> is last element
+to be checked.</p>
+</div>
+<div class="paragraph">
+<p>Knowing the parsing order will help you devise unambiguous macro, list
+and block syntax rules.</p>
+</div>
+<div class="paragraph">
+<p>Inline substitutions within block elements are performed in the
+following default order:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Special characters</p>
+</li>
+<li>
+<p>Quotes</p>
+</li>
+<li>
+<p>Special words</p>
+</li>
+<li>
+<p>Replacements</p>
+</li>
+<li>
+<p>Attributes</p>
+</li>
+<li>
+<p>Inline Macros</p>
+</li>
+<li>
+<p>Replacements2</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The substitutions and substitution order performed on
+Title, Paragraph and DelimitedBlock elements is determined by
+configuration file parameters.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_text_formatting">10. Text Formatting</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="X51">10.1. Quoted Text</h3>
+<div class="paragraph">
+<p>Words and phrases can be formatted by enclosing inline text with
+quote characters:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><em>Emphasized text</em></dt>
+<dd>
+<p>Word phrases 'enclosed in single quote characters' (acute
+accents) or _underline characters_ are emphasized.</p>
+</dd>
+<dt class="hdlist1"><strong>Strong text</strong></dt>
+<dd>
+<p>Word phrases *enclosed in asterisk characters* are rendered
+in a strong font (usually bold).</p>
+</dd>
+<dt class="hdlist1"><a id="X81"></a><code>Monospaced text</code></dt>
+<dd>
+<p>Word phrases +enclosed in plus characters+ are rendered in a
+monospaced font. Word phrases `enclosed in backtick
+characters` (grave accents) are also rendered in a monospaced
+font but in this case the enclosed text is rendered literally
+and is not subject to further expansion (see <a href="#X80">inline
+literal passthrough</a>).</p>
+</dd>
+<dt class="hdlist1">&#8216;Single quoted text&#8217;</dt>
+<dd>
+<p>Phrases enclosed with a `single grave accent to the left and
+a single acute accent to the right' are rendered in single
+quotation marks.</p>
+</dd>
+<dt class="hdlist1">&#8220;Double quoted text&#8221;</dt>
+<dd>
+<p>Phrases enclosed with ``two grave accents to the left and
+two acute accents to the right'' are rendered in quotation
+marks.</p>
+</dd>
+<dt class="hdlist1"><mark>Unquoted text</mark></dt>
+<dd>
+<p>Placing #hashes around text# does nothing, it is a mechanism
+to allow inline attributes to be applied to otherwise
+unformatted text.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>New quote types can be defined by editing asciidoc(1) configuration
+files. See the <a href="#X7">Configuration Files</a> section for details.</p>
+</div>
+<div class="ulist">
+<div class="title">Quoted text behavior</div>
+<ul>
+<li>
+<p>Quoting cannot be overlapped.</p>
+</li>
+<li>
+<p>Different quoting types can be nested.</p>
+</li>
+<li>
+<p>To suppress quoted text formatting place a backslash character
+immediately in front of the leading quote character(s). In the case
+of ambiguity between escaped and non-escaped text you will need to
+escape both leading and trailing quotes, in the case of
+multi-character quotes you may even need to escape individual
+characters.</p>
+</li>
+</ul>
+</div>
+<div class="sect3">
+<h4 id="X96">10.1.1. Quoted text attributes</h4>
+<div class="paragraph">
+<p>Quoted text can be prefixed with an <a href="#X21">attribute list</a>.  The first
+positional attribute (<em>role</em> attribute) is translated by AsciiDoc to
+an HTML <em>span</em> element <em>class</em> attribute or a DocBook <em>phrase</em> element
+<em>role</em> attribute.</p>
+</div>
+<div class="paragraph">
+<p>DocBook XSL Stylesheets translate DocBook <em>phrase</em> elements with
+<em>role</em> attributes to corresponding HTML <em>span</em> elements with the same
+<em>class</em> attributes; CSS can then be used
+<a href="http://www.sagehill.net/docbookxsl/UsingCSS.html">to style the
+generated HTML</a>.  Thus CSS styling can be applied to both DocBook and
+AsciiDoc generated HTML outputs.  You can also specify multiple class
+names separated by spaces.</p>
+</div>
+<div class="paragraph">
+<p>CSS rules for text color, text background color, text size and text
+decorators are included in the distributed AsciiDoc CSS files and are
+used in conjunction with AsciiDoc <em>xhtml11</em>, <em>html5</em> and <em>docbook</em>
+outputs. The CSS class names are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><em>&lt;color&gt;</em> (text foreground color).</p>
+</li>
+<li>
+<p><em>&lt;color&gt;-background</em> (text background color).</p>
+</li>
+<li>
+<p><em>big</em> and <em>small</em> (text size).</p>
+</li>
+<li>
+<p><em>underline</em>, <em>overline</em> and <em>line-through</em> (strike through) text
+decorators.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Where <em>&lt;color&gt;</em> can be any of the
+<a href="http://en.wikipedia.org/wiki/Web_colors#HTML_color_names">sixteen HTML
+color names</a>.  Examples:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[red]#Obvious# and [big red yellow-background]*very obvious*.</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[underline]#Underline text#, [overline]#overline text# and
+[blue line-through]*bold blue and line-through*.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>is rendered as:</p>
+</div>
+<div class="paragraph">
+<p><span class="red">Obvious</span> and <strong class="big red yellow-background">very obvious</strong>.</p>
+</div>
+<div class="paragraph">
+<p><span class="underline">Underline text</span>, <span class="overline">overline text</span> and
+<strong class="bold blue line-through">bold blue and line-through</strong>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Color and text decorator attributes are rendered for XHTML and
+HTML 5 outputs using CSS stylesheets.  The mechanism to implement
+color and text decorator attributes is provided for DocBook toolchains
+via the DocBook <em>phrase</em> element <em>role</em> attribute, but the actual
+rendering is toolchain specific and is not part of the AsciiDoc
+distribution.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<hr>
+<div class="footnote" id="_footnote_1">
+<a href="#_footnoteref_1">1</a>. This is a rough structural guide, not a rigorous syntax definition
+</div>
+</div>
