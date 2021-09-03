@@ -2,7 +2,7 @@
 
 ORIG_ARGV = ARGV.dup
 
-require "bundler/setup"
+# require "bundler/setup"
 require "active_support/core_ext/kernel/reporting"
 
 silence_warnings do
@@ -10,7 +10,7 @@ silence_warnings do
   Encoding.default_external = Encoding::UTF_8
 end
 
-require "active_support/testing/autorun"
+# require "active_support/testing/autorun"
 require "active_support/testing/method_call_assertions"
 
 ENV["NO_RELOAD"] = "1"
@@ -48,4 +48,4 @@ class ActiveSupport::TestCase
     end
 end
 
-require_relative "../../tools/test_common"
+# require_relative "../../tools/test_common"
