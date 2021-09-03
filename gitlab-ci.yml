@@ -2,10 +2,10 @@ stages:
   - build-and-test
   - benchmark
 
-# Build the GraalVM CE Binary and run tests
+# Build the VMs and run tests
 build-test-benchmark:
   stage: build-and-test
-  tags: [yuria]
+  tags: [yuria2]
   script:
     - bin/jt build --env jvm-ce
     - bin/jt build --env jvm
