@@ -13,7 +13,7 @@ module ActiveSupport
 
       def start
         parallelize if should_parallelize?
-        show_execution_info
+        # show_execution_info
 
         parallel_executor.start if parallelized?
       end
@@ -53,7 +53,8 @@ module ActiveSupport
         end
 
         def should_parallelize?
-          ENV["PARALLEL_WORKERS"] || tests_count > threshold
+          # ENV["PARALLEL_WORKERS"] || tests_count > threshold
+          false
         end
 
         def tests_count
