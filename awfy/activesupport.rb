@@ -1,10 +1,23 @@
 $LOAD_PATH.unshift "#{__dir__}/../activesupport/lib"
 $LOAD_PATH.unshift "#{__dir__}/../activesupport/gems/minitest-5.14.4/lib/"
+$LOAD_PATH.unshift "#{__dir__}/../activesupport/gems/concurrent-ruby-1.1.9/lib/concurrent-ruby"
+$LOAD_PATH.unshift "#{__dir__}/../activesupport/gems/i18n-1.8.10/lib"
+$LOAD_PATH.unshift "#{__dir__}/../activesupport/gems/tzinfo-2.0.4/lib"
 
 require "minitest"
 
 class Activesupport < Benchmark
   def initialize
+    @inner_iterations = 0
+    @known_results = {
+      1 => {
+        :assertions => 9,
+        :count => 4,
+        :errors => 0,
+        :failures => 0,
+        :skips => 0
+      }
+    }
     @know_tests = [
       "test/actionable_error_test.rb",
       "test/array_inquirer_test.rb",
@@ -157,6 +170,7 @@ class Activesupport < Benchmark
   end
 
   def inner_benchmark_loop(inner_iterations)
+    @inner_iterations = inner_iterations
     if inner_iterations > @know_tests.size
       puts "Unsupported number of tests to execute"
       puts "There are currently at most #{@know_tests.size} tests"
@@ -166,10 +180,16 @@ class Activesupport < Benchmark
     (0...inner_iterations).each { |i| p i; p @know_tests[i]; require_relative "#{__dir__}/../activesupport/#{@know_tests[i]}" }
 
     reporter = Minitest.run ["--no-plugins", "--seed", "42"]
-    verify_result reporter
+    verify_result reporter.reporters[0]
   end
 
   def verify_result(result)
-    @result == result
+    expected = @known_results[@inner_iterations]
+
+    (expected[:assertions] == result.assertions and
+      expected[:count] == result.count and
+      expected[:errors] == result.errors and
+      expected[:failures] == result.failures and
+      expected[:skips] == result.skips)
   end
 end
