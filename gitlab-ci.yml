@@ -18,7 +18,9 @@ build-test-benchmark:
     - bin/jt --use jvm-ce test :next
     
     # Start Benchmarking
-    - cd faststart && rebench rebench.conf
+    - cd faststart
+    - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf
+    - rebench --experiment="CI ID $CI_PIPELINE_ID" --report-completion rebench.conf
 
 
 # A full CI Run, which should be scheduled, weekly or so
