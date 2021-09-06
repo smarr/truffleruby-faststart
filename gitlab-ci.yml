@@ -9,17 +9,19 @@ build-jvm-ce:
   tags: [yuria]
   script:
     - export PROJECT_FOLDER=$(pwd)
+    - export PATH=${PROJECT_FOLDER}/bin:${PATH}
     - export VARIANT=jvm-ce
     - bin/jt build --env ${VARIANT}
-    - cd $(dirname $(bin/jt --use ${VARIANT} graalvm-home))
-    - mv $(basename $(bin/jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
+    - cd $(dirname $(jt --use ${VARIANT} graalvm-home))
+    - mv $(basename $(jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
     - tar cJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.xz truffleruby-${VARIANT}
+    - cd ${PROJECT_FOLDER}
     
     # Run time: 2.3min
-    - bin/jt --use jvm-ce test fast
+    - jt --use jvm-ce test fast
 
     # Run time: 2sec
-    - bin/jt --use jvm-ce test :next
+    - jt --use jvm-ce test :next
   artifacts:
     paths:
       - truffleruby-jvm-ce.xz
@@ -30,10 +32,11 @@ build-jvm:
   tags: [yuria]
   script:
     - export PROJECT_FOLDER=$(pwd)
+    - export PATH=${PROJECT_FOLDER}/bin:${PATH}
     - export VARIANT=jvm
-    - bin/jt build --env ${VARIANT}
-    - cd $(dirname $(bin/jt --use ${VARIANT} graalvm-home))
-    - mv $(basename $(bin/jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
+    - jt build --env ${VARIANT}
+    - cd $(dirname $(jt --use ${VARIANT} graalvm-home))
+    - mv $(basename $(jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
     - tar cJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.xz truffleruby-${VARIANT}
   artifacts:
     paths:
@@ -45,10 +48,11 @@ build-native:
   tags: [yuria]
   script:
     - export PROJECT_FOLDER=$(pwd)
+    - export PATH=${PROJECT_FOLDER}/bin:${PATH}
     - export VARIANT=native
-    - bin/jt build --env ${VARIANT}
-    - cd $(dirname $(bin/jt --use ${VARIANT} graalvm-home))
-    - mv $(basename $(bin/jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
+    - jt build --env ${VARIANT}
+    - cd $(dirname $(jt --use ${VARIANT} graalvm-home))
+    - mv $(basename $(jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
     - tar cJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.xz truffleruby-${VARIANT}
   artifacts:
     paths:
