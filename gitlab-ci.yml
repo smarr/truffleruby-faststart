@@ -1,31 +1,91 @@
 stages:
-  - build-and-test
+  - build
+  - test
   - benchmark
 
 # Build the VMs and run tests
-build-test-benchmark:
-  stage: build-and-test
-  tags: [yuria2]
+build-jvm-ce:
+  stage: build
+  tags: [yuria]
   script:
-    - bin/jt build --env jvm-ce
-    - bin/jt build --env jvm
-    - bin/jt build --env native
+    - export PROJECT_FOLDER=$(pwd)
+    - export VARIANT=jvm-ce
+    - bin/jt build --env ${VARIANT}
+    - cd $(dirname $(bin/jt --use ${VARIANT} graalvm-home))
+    - mv $(basename $(bin/jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
+    - tar cJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.xz truffleruby-${VARIANT}
     
     # Run time: 2.3min
     - bin/jt --use jvm-ce test fast
 
     # Run time: 2sec
     - bin/jt --use jvm-ce test :next
+  artifacts:
+    paths:
+      - truffleruby-jvm-ce.xz
+    expire_in: 1 week
+
+build-jvm:
+  stage: build
+  tags: [yuria]
+  script:
+    - export PROJECT_FOLDER=$(pwd)
+    - export VARIANT=jvm
+    - bin/jt build --env ${VARIANT}
+    - cd $(dirname $(bin/jt --use ${VARIANT} graalvm-home))
+    - mv $(basename $(bin/jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
+    - tar cJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.xz truffleruby-${VARIANT}
+  artifacts:
+    paths:
+      - truffleruby-jvm.xz
+    expire_in: 1 week
+
+build-native:
+  stage: build
+  tags: [yuria]
+  script:
+    - export PROJECT_FOLDER=$(pwd)
+    - export VARIANT=native
+    - bin/jt build --env ${VARIANT}
+    - cd $(dirname $(bin/jt --use ${VARIANT} graalvm-home))
+    - mv $(basename $(bin/jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
+    - tar cJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.xz truffleruby-${VARIANT}
+  artifacts:
+    paths:
+      - truffleruby-native.xz
+    expire_in: 1 week
+
+test-jvm-ce:
+  stage: test
+  dependencies:
+    - build-jvm-ce
+  script:
+    - export PROJECT_FOLDER=$(pwd)
+    - export VARIANT=jvm-ce
+    - tar xJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.xz
+    - truffleruby-${VARIANT}/bin/truffleruby -e 'p 3+4'
+
+
+
+# Build the VMs and run tests
+benchmark1:
+  stage: benchmark
+  tags: [yuria]
+  script:
+    - export PROJECT_FOLDER=$(pwd)
+    - export VARIANT=jvm-ce
+    - tar xJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.xz
+    - truffleruby-${VARIANT}/bin/truffleruby -e 'p 3+4'
     
     # Start Benchmarking
     - cd faststart
-    - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf
+    - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf s:*:List
     - rebench --experiment="CI ID $CI_PIPELINE_ID" --report-completion rebench.conf
 
 
 # A full CI Run, which should be scheduled, weekly or so
 full-test-run-on-jvm-ce:on-schedule:
-  stage: build-and-test
+  stage: build
   tags: [yuria]
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
