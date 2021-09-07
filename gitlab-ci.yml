@@ -11,22 +11,28 @@ build-jvm-ce:
     - export PROJECT_FOLDER=$(pwd)
     - export PATH=${PROJECT_FOLDER}/bin:${PATH}
     - export VARIANT=jvm-ce
-    - bin/jt build --env ${VARIANT}
-    - cd $(dirname $(jt --use ${VARIANT} graalvm-home))
+    - jt build --env ${VARIANT}
+    - export RESULT_HOME=$(dirname $(jt --use ${VARIANT} graalvm-home))
+    - cd ${RESULT_HOME}
     - mv $(basename $(jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
-    - tar cJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.xz truffleruby-${VARIANT}
+    - time tar cJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.xz truffleruby-${VARIANT}
+    - ls -lah ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.xz
+    - time tar cjf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.bzip2 truffleruby-${VARIANT}
+    - ls -lah ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.bzip2
+    - time tar cf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar truffleruby-${VARIANT}
+    - ls -lah ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar
     - cd ${PROJECT_FOLDER}
     
     # Run time: 2.3min
-    - jt --use $(dirname $(jt --use ${VARIANT} graalvm-home))/truffleruby-${VARIANT}/bin/truffleruby test fast
+    - jt --use ${RESULT_HOME}/truffleruby-${VARIANT}/bin/truffleruby test fast
 
     # Run time: 2sec
-    - jt --use $(dirname $(jt --use ${VARIANT} graalvm-home))/truffleruby-${VARIANT}/bin/truffleruby test :next
+    - jt --use ${RESULT_HOME}/truffleruby-${VARIANT}/bin/truffleruby test :next
     
     - |
       sftp tmp-artifacts@stefan-marr.de << EOF
         -mkdir /incoming/${CI_PIPELINE_ID}/
-        put truffleruby-${VARIANT}.xz /incoming/${CI_PIPELINE_ID}/
+        put ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.xz /incoming/${CI_PIPELINE_ID}/
       EOF
 
 build-jvm:
@@ -37,13 +43,14 @@ build-jvm:
     - export PATH=${PROJECT_FOLDER}/bin:${PATH}
     - export VARIANT=jvm
     - jt build --env ${VARIANT}
-    - cd $(dirname $(jt --use ${VARIANT} graalvm-home))
+    - export RESULT_HOME=$(dirname $(jt --use ${VARIANT} graalvm-home))
+    - cd ${RESULT_HOME}
     - mv $(basename $(jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
-    - tar cJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.xz truffleruby-${VARIANT}
+    - tar cJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.xz truffleruby-${VARIANT}
     - |
       sftp tmp-artifacts@stefan-marr.de << EOF
         -mkdir /incoming/${CI_PIPELINE_ID}/
-        put truffleruby-${VARIANT}.xz /incoming/${CI_PIPELINE_ID}/
+        put ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.xz /incoming/${CI_PIPELINE_ID}/
       EOF
 
 build-native:
@@ -54,13 +61,14 @@ build-native:
     - export PATH=${PROJECT_FOLDER}/bin:${PATH}
     - export VARIANT=native
     - jt build --env ${VARIANT}
-    - cd $(dirname $(jt --use ${VARIANT} graalvm-home))
+    - export RESULT_HOME=$(dirname $(jt --use ${VARIANT} graalvm-home))
+    - cd ${RESULT_HOME}
     - mv $(basename $(jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
-    - tar cJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.xz truffleruby-${VARIANT}
+    - tar cJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.xz truffleruby-${VARIANT}
     - |
       sftp tmp-artifacts@stefan-marr.de << EOF
         -mkdir /incoming/${CI_PIPELINE_ID}/
-        put truffleruby-${VARIANT}.xz /incoming/${CI_PIPELINE_ID}/
+        put ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.xz /incoming/${CI_PIPELINE_ID}/
       EOF
 
 
@@ -71,8 +79,8 @@ test-jvm-ce:
   script:
     - export PROJECT_FOLDER=$(pwd)
     - export VARIANT=jvm-ce
-    - sftp tmp-artifacts@stefan-marr.de:/incoming/${CI_PIPELINE_ID}/truffleruby-${VARIANT}.xz
-    - tar xJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.xz
+    - sftp tmp-artifacts@stefan-marr.de:/incoming/${CI_PIPELINE_ID}/truffleruby-${VARIANT}.tar.xz
+    - tar xJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.xz
     - truffleruby-${VARIANT}/bin/truffleruby -e 'p 3+4'
 
 
