@@ -13,7 +13,10 @@ build1-native-and-jvm-ce:
   script:
     - export PROJECT_FOLDER=$(pwd)
     - export PATH=${PROJECT_FOLDER}/bin:${PATH}
-    - export VARIANT=native
+
+    # Copy Custom Config into TruffleRuby setup
+    - export VARIANT=native-libgraal
+    - cp faststart/${VARIANT}.env mx.truffleruby/${VARIANT}
 
     # build
     - jt build --env ${VARIANT}
@@ -52,6 +55,7 @@ build2-jvm:
     - mv $(basename $(jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
     - rm -Rf truffleruby-${VARIANT}/legal truffleruby-${VARIANT}/lib/visualvm truffleruby-${VARIANT}/lib/jfr truffleruby-${VARIANT}/tools truffleruby-${VARIANT}/include truffleruby-${VARIANT}/lib/llvm
     - tar -I lz4 -cf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.lz4 truffleruby-${VARIANT}
+
     - |
       sftp tmp-artifacts << EOF
         -mkdir incoming/${CI_PIPELINE_ID}/
@@ -64,7 +68,7 @@ benchmark1:
   tags: [yuria]
   script:
     - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-jvm.tar.lz4
-    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-native.tar.lz4
+    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-native-libgraal.tar.lz4
     
     - export PROJECT_FOLDER=$(pwd)
     - rm -Rf /tmp/truffleruby
@@ -72,7 +76,7 @@ benchmark1:
     - cp -R faststart /tmp/truffleruby
     - cd /tmp/truffleruby
     - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-jvm.tar.lz4
-    - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-native.tar.lz4
+    - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-native-libgraal.tar.lz4
     
     - cd faststart
     - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf m:yuria
@@ -84,7 +88,7 @@ benchmark2:
   tags: [yuria2]
   script:
     - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-jvm.tar.lz4
-    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-native.tar.lz4
+    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-native-libgraal.tar.lz4
     
     - export PROJECT_FOLDER=$(pwd)
     - rm -Rf /tmp/truffleruby
@@ -92,7 +96,7 @@ benchmark2:
     - cp -R faststart /tmp/truffleruby
     - cd /tmp/truffleruby
     - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-jvm.tar.lz4
-    - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-native.tar.lz4
+    - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-native-libgraal.tar.lz4
     
     - cd faststart
     - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf m:yuria2
@@ -104,7 +108,7 @@ benchmark3:
   tags: [yuria3]
   script:
     - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-jvm.tar.lz4
-    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-native.tar.lz4
+    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-native-libgraal.tar.lz4
     
     - export PROJECT_FOLDER=$(pwd)
     - rm -Rf /tmp/truffleruby
@@ -112,7 +116,7 @@ benchmark3:
     - cp -R faststart /tmp/truffleruby
     - cd /tmp/truffleruby
     - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-jvm.tar.lz4
-    - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-native.tar.lz4
+    - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-native-libgraal.tar.lz4
     
     - cd faststart
     - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf m:yuria3
