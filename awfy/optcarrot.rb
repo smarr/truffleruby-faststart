@@ -1,10 +1,10 @@
-$LOAD_PATH.unshift "#{__dir__}/../../bench/optcarrot"
+$LOAD_PATH.unshift "#{__dir__}/../optcarrot"
 require 'lib/optcarrot'
 
 class OptCarrot < Benchmark
 
   def initialize
-    @rom = "#{__dir__}/../../bench/optcarrot/examples/Lan_Master.nes"
+    @rom = "#{__dir__}/../optcarrot/examples/Lan_Master.nes"
     @iteration = 0
   end
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require_relative 'som'
 
-$LOAD_PATH.unshift "#{__dir__}/../../bench/liquid"
+$LOAD_PATH.unshift "#{__dir__}/../liquid"
 require 'performance/shopify/liquid'
 
 
@@ -9,7 +9,7 @@ class LiquidCartParse < Benchmark
 
   def initialize
     @random = Random.new
-    @cart_template_source = File.read("#{__dir__}/../../bench/liquid/performance/tests/dropify/cart.liquid")
+    @cart_template_source = File.read("#{__dir__}/../liquid/performance/tests/dropify/cart.liquid")
     @input = '0'
   end
 

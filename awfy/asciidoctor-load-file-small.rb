@@ -1,4 +1,4 @@
-require_relative '../../bench/asciidoctor/asciidoctor/lib/asciidoctor'
+require_relative '../asciidoctor/asciidoctor/lib/asciidoctor'
 
 class AsciidoctorLoadFileSmall < Benchmark
   def initialize

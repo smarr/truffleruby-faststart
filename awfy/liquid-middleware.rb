@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-$LOAD_PATH.unshift "#{__dir__}/../../bench/liquid/lib"
+$LOAD_PATH.unshift "#{__dir__}/../liquid/lib"
 require 'liquid'
 
 class LiquidMiddleware < Benchmark

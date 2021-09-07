@@ -1,8 +1,8 @@
-require_relative '../../bench/asciidoctor/asciidoctor/lib/asciidoctor'
+require_relative '../asciidoctor/asciidoctor/lib/asciidoctor'
 
 class AsciidoctorConvert < Benchmark
   def initialize
-    sample_file = "#{__dir__}/../../bench/asciidoctor/data/userguide.adoc"
+    sample_file = "#{__dir__}/../asciidoctor/data/userguide.adoc"
     @sample_file_text = File.read(sample_file)
     @result = File.read("#{__dir__}/asciidoctor-convert.result.html")
   end

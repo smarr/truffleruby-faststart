@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require_relative 'som'
 
-$LOAD_PATH.unshift "#{__dir__}/../../bench/liquid"
+$LOAD_PATH.unshift "#{__dir__}/../liquid"
 require 'performance/shopify/liquid'
 require 'performance/shopify/database'
 
@@ -10,8 +10,8 @@ class LiquidCartRender < Benchmark
 
   def initialize
     @random = Random.new
-    @cart_template = Liquid::Template.new.parse(File.read("#{__dir__}/../../bench/liquid/performance/tests/dropify/cart.liquid"))
-    @theme_template = Liquid::Template.new.parse(File.read("#{__dir__}/../../bench/liquid/performance/tests/dropify/theme.liquid"))
+    @cart_template = Liquid::Template.new.parse(File.read("#{__dir__}/../liquid/performance/tests/dropify/cart.liquid"))
+    @theme_template = Liquid::Template.new.parse(File.read("#{__dir__}/../liquid/performance/tests/dropify/theme.liquid"))
 
     @assigns = Database.tables
     @assigns['page_title'] = 'Page title'
