@@ -67,7 +67,8 @@ benchmark1:
     - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-native.tar.lz4
     
     - export PROJECT_FOLDER=$(pwd)
-    - mkdir /tmp/truffleruby
+    - rm -Rf /tmp/truffleruby
+    - mkdir -p /tmp/truffleruby
     - cp -R faststart /tmp/truffleruby
     - cd /tmp/truffleruby
     - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-jvm.tar.lz4
@@ -86,7 +87,8 @@ benchmark2:
     - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-native.tar.lz4
     
     - export PROJECT_FOLDER=$(pwd)
-    - mkdir /tmp/truffleruby
+    - rm -Rf /tmp/truffleruby
+    - mkdir -p /tmp/truffleruby
     - cp -R faststart /tmp/truffleruby
     - cd /tmp/truffleruby
     - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-jvm.tar.lz4
@@ -105,7 +107,8 @@ benchmark3:
     - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-native.tar.lz4
     
     - export PROJECT_FOLDER=$(pwd)
-    - mkdir /tmp/truffleruby
+    - rm -Rf /tmp/truffleruby
+    - mkdir -p /tmp/truffleruby
     - cp -R faststart /tmp/truffleruby
     - cd /tmp/truffleruby
     - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-jvm.tar.lz4
