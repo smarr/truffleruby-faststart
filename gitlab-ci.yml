@@ -78,7 +78,8 @@ benchmark1:
     - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-jvm.tar.lz4
     - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-native-libgraal.tar.lz4
     
-    - cd faststart
+    # back to the harddisk so that rebench can read the version details
+    - cd ${PROJECT_FOLDER}/faststart
     - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf m:yuria
     - rm -Rf /tmp/truffleruby
 
@@ -98,7 +99,8 @@ benchmark2:
     - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-jvm.tar.lz4
     - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-native-libgraal.tar.lz4
     
-    - cd faststart
+    # back to the harddisk so that rebench can read the version details
+    - cd ${PROJECT_FOLDER}/faststart
     - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf m:yuria2
     - rm -Rf /tmp/truffleruby
 
@@ -118,7 +120,8 @@ benchmark3:
     - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-jvm.tar.lz4
     - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-native-libgraal.tar.lz4
     
-    - cd faststart
+    # back to the harddisk so that rebench can read the version details
+    - cd ${PROJECT_FOLDER}/faststart
     - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf m:yuria3
     - rm -Rf /tmp/truffleruby
 
