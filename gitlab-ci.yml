@@ -2,9 +2,10 @@ stages:
   - build
   - test
   - benchmark
+  - benchmark-completion
 
 # Build the VMs and run tests
-build-jvm-ce:
+build1-jvm-ce:
   stage: build
   tags: [yuria]
   script:
@@ -15,12 +16,7 @@ build-jvm-ce:
     - export RESULT_HOME=$(dirname $(jt --use ${VARIANT} graalvm-home))
     - cd ${RESULT_HOME}
     - mv $(basename $(jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
-    - time tar cJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.xz truffleruby-${VARIANT}
-    - ls -lah ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.xz
-    - time tar cjf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.bzip2 truffleruby-${VARIANT}
-    - ls -lah ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.bzip2
-    - time tar cf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar truffleruby-${VARIANT}
-    - ls -lah ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar
+    - tar -I lz4 -cf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.lz4 truffleruby-${VARIANT}
     - cd ${PROJECT_FOLDER}
     
     # Run time: 2.3min
@@ -30,14 +26,14 @@ build-jvm-ce:
     - jt --use ${RESULT_HOME}/truffleruby-${VARIANT}/bin/truffleruby test :next
     
     - |
-      sftp tmp-artifacts@stefan-marr.de << EOF
-        -mkdir /incoming/${CI_PIPELINE_ID}/
-        put ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.xz /incoming/${CI_PIPELINE_ID}/
+      sftp tmp-artifacts << EOF
+        -mkdir incoming/${CI_PIPELINE_ID}/
+        put ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.lz4 incoming/${CI_PIPELINE_ID}/
       EOF
 
-build-jvm:
+build2-jvm:
   stage: build
-  tags: [yuria]
+  tags: [yuria2]
   script:
     - export PROJECT_FOLDER=$(pwd)
     - export PATH=${PROJECT_FOLDER}/bin:${PATH}
@@ -46,16 +42,16 @@ build-jvm:
     - export RESULT_HOME=$(dirname $(jt --use ${VARIANT} graalvm-home))
     - cd ${RESULT_HOME}
     - mv $(basename $(jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
-    - tar cJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.xz truffleruby-${VARIANT}
+    - tar -I lz4 -cf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.lz4 truffleruby-${VARIANT}
     - |
-      sftp tmp-artifacts@stefan-marr.de << EOF
-        -mkdir /incoming/${CI_PIPELINE_ID}/
-        put ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.xz /incoming/${CI_PIPELINE_ID}/
+      sftp tmp-artifacts << EOF
+        -mkdir incoming/${CI_PIPELINE_ID}/
+        put ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.lz4 incoming/${CI_PIPELINE_ID}/
       EOF
 
-build-native:
+build3-native:
   stage: build
-  tags: [yuria]
+  tags: [yuria3]
   script:
     - export PROJECT_FOLDER=$(pwd)
     - export PATH=${PROJECT_FOLDER}/bin:${PATH}
@@ -64,40 +60,67 @@ build-native:
     - export RESULT_HOME=$(dirname $(jt --use ${VARIANT} graalvm-home))
     - cd ${RESULT_HOME}
     - mv $(basename $(jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
-    - tar cJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.xz truffleruby-${VARIANT}
+    - tar -I lz4 -cf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.lz4 truffleruby-${VARIANT}
     - |
-      sftp tmp-artifacts@stefan-marr.de << EOF
-        -mkdir /incoming/${CI_PIPELINE_ID}/
-        put ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.xz /incoming/${CI_PIPELINE_ID}/
+      sftp tmp-artifacts << EOF
+        -mkdir incoming/${CI_PIPELINE_ID}/
+        put ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.lz4 incoming/${CI_PIPELINE_ID}/
       EOF
 
-
-test-jvm-ce:
-  stage: test
-  dependencies:
-    - build-jvm-ce
-  script:
-    - export PROJECT_FOLDER=$(pwd)
-    - export VARIANT=jvm-ce
-    - sftp tmp-artifacts@stefan-marr.de:/incoming/${CI_PIPELINE_ID}/truffleruby-${VARIANT}.tar.xz
-    - tar xJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.xz
-    - truffleruby-${VARIANT}/bin/truffleruby -e 'p 3+4'
-
-
-
-# Build the VMs and run tests
+# Run Benchmarks
 benchmark1:
   stage: benchmark
   tags: [yuria]
   script:
-    - export PROJECT_FOLDER=$(pwd)
-    - export VARIANT=jvm-ce
-    - tar xJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.xz
-    - truffleruby-${VARIANT}/bin/truffleruby -e 'p 3+4'
+    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-jvm.tar.lz4
+    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-jvm-ce.tar.lz4
+    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-native.tar.lz4
     
-    # Start Benchmarking
+    - tar -I lz4 -xf truffleruby-jvm.tar.lz4
+    - tar -I lz4 -xf truffleruby-jvm-ce.tar.lz4
+    - tar -I lz4 -xf truffleruby-native.tar.lz4
+    
     - cd faststart
-    - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf s:*:List
+    - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf m:yuria
+
+# Run Benchmarks
+benchmark2:
+  stage: benchmark
+  tags: [yuria2]
+  script:
+    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-jvm.tar.lz4
+    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-jvm-ce.tar.lz4
+    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-native.tar.lz4
+    
+    - tar -I lz4 -xf truffleruby-jvm.tar.lz4
+    - tar -I lz4 -xf truffleruby-jvm-ce.tar.lz4
+    - tar -I lz4 -xf truffleruby-native.tar.lz4
+    
+    - cd faststart
+    - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf m:yuria2
+
+# Run Benchmarks
+benchmark3:
+  stage: benchmark
+  tags: [yuria3]
+  script:
+    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-jvm.tar.lz4
+    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-jvm-ce.tar.lz4
+    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-native.tar.lz4
+    
+    - tar -I lz4 -xf truffleruby-jvm.tar.lz4
+    - tar -I lz4 -xf truffleruby-jvm-ce.tar.lz4
+    - tar -I lz4 -xf truffleruby-native.tar.lz4
+    
+    - cd faststart
+    - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf m:yuria3
+
+
+report-completion:
+  stage: benchmark-completion
+  tags: [yuria]
+  script:
+    - cd faststart
     - rebench --experiment="CI ID $CI_PIPELINE_ID" --report-completion rebench.conf
 
 
