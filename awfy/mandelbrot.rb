@@ -50,6 +50,7 @@ class Mandelbrot < Benchmark
     return result == 191 if inner_iterations == 500
     return result == 50  if inner_iterations == 750
     return result == 15  if inner_iterations ==  50
+    return result == 193 if inner_iterations ==  20
     return result == 127 if inner_iterations ==  10
     return result == 128 if inner_iterations ==   1
 
