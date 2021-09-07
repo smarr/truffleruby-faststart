@@ -18,14 +18,16 @@ build-jvm-ce:
     - cd ${PROJECT_FOLDER}
     
     # Run time: 2.3min
-    - jt --use jvm-ce test fast
+    - jt --use $(dirname $(jt --use ${VARIANT} graalvm-home))/truffleruby-${VARIANT}/bin/truffleruby test fast
 
     # Run time: 2sec
-    - jt --use jvm-ce test :next
-  artifacts:
-    paths:
-      - truffleruby-jvm-ce.xz
-    expire_in: 1 week
+    - jt --use $(dirname $(jt --use ${VARIANT} graalvm-home))/truffleruby-${VARIANT}/bin/truffleruby test :next
+    
+    - |
+      sftp tmp-artifacts@stefan-marr.de << EOF
+        -mkdir /incoming/${CI_PIPELINE_ID}/
+        put truffleruby-${VARIANT}.xz /incoming/${CI_PIPELINE_ID}/
+      EOF
 
 build-jvm:
   stage: build
@@ -38,10 +40,11 @@ build-jvm:
     - cd $(dirname $(jt --use ${VARIANT} graalvm-home))
     - mv $(basename $(jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
     - tar cJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.xz truffleruby-${VARIANT}
-  artifacts:
-    paths:
-      - truffleruby-jvm.xz
-    expire_in: 1 week
+    - |
+      sftp tmp-artifacts@stefan-marr.de << EOF
+        -mkdir /incoming/${CI_PIPELINE_ID}/
+        put truffleruby-${VARIANT}.xz /incoming/${CI_PIPELINE_ID}/
+      EOF
 
 build-native:
   stage: build
@@ -54,10 +57,12 @@ build-native:
     - cd $(dirname $(jt --use ${VARIANT} graalvm-home))
     - mv $(basename $(jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
     - tar cJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.xz truffleruby-${VARIANT}
-  artifacts:
-    paths:
-      - truffleruby-native.xz
-    expire_in: 1 week
+    - |
+      sftp tmp-artifacts@stefan-marr.de << EOF
+        -mkdir /incoming/${CI_PIPELINE_ID}/
+        put truffleruby-${VARIANT}.xz /incoming/${CI_PIPELINE_ID}/
+      EOF
+
 
 test-jvm-ce:
   stage: test
@@ -66,6 +71,7 @@ test-jvm-ce:
   script:
     - export PROJECT_FOLDER=$(pwd)
     - export VARIANT=jvm-ce
+    - sftp tmp-artifacts@stefan-marr.de:/incoming/${CI_PIPELINE_ID}/truffleruby-${VARIANT}.xz
     - tar xJf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.xz
     - truffleruby-${VARIANT}/bin/truffleruby -e 'p 3+4'
 
