@@ -19,7 +19,8 @@ build1-native-and-jvm-ce:
     - cp faststart/${VARIANT}.env mx.truffleruby/${VARIANT}
 
     # build
-    - jt build --env ${VARIANT}
+    - (cd ../graal && git fetch --all) || true
+    - jt build --sforceimports --env ${VARIANT}
 
     # package
     - export RESULT_HOME=$(dirname $(jt --use ${VARIANT} graalvm-home))
@@ -41,7 +42,9 @@ build2-jvm:
     - export PROJECT_FOLDER=$(pwd)
     - export PATH=${PROJECT_FOLDER}/bin:${PATH}
     - export VARIANT=jvm
-    - jt build --env ${VARIANT}
+    
+    - (cd ../graal && git fetch --all) || true
+    - jt build --sforceimports --env ${VARIANT}
     
     # test
     # Run time: 2.3min
@@ -141,7 +144,7 @@ full-test-run-on-jvm-ce:on-schedule:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   script:
-    - bin/jt build --env jvm-ce
+    - bin/jt build --sforceimports --env jvm-ce
     
     # Run time: 2.3min
     - bin/jt --use jvm-ce test fast
