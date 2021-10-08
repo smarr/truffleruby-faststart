@@ -20,6 +20,7 @@ build1-native-and-jvm-ce:
 
     # build
     - (cd ../graal && git fetch --all) || true
+    - (cd ../mx && git pull) || true
     - jt build --sforceimports --env ${VARIANT}
 
     # package
@@ -44,6 +45,7 @@ build2-jvm:
     - export VARIANT=jvm
     
     - (cd ../graal && git fetch --all) || true
+    - (cd ../mx && git pull) || true
     - jt build --sforceimports --env ${VARIANT}
     
     # test
