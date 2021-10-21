@@ -4,6 +4,42 @@ stages:
   - benchmark
   - benchmark-completion
 
+.scripts:
+   prep-path: &PREP_PATH |
+     export PROJECT_FOLDER=$(pwd)
+     export PATH=${PROJECT_FOLDER}/bin:${PATH}
+
+   ensure-git-dependencies: &GIT_DEPS |
+     git -C ../graal fetch --all || true
+     git -C ../mx pull || true
+     git clone --depth=1 https://git.cs.kent.ac.uk/sm951/faststart.git faststart || true
+
+   package-truffleruby: &PACKAGE_TR |
+     export RESULT_HOME=$(dirname $(jt --use ${VARIANT} graalvm-home))
+     cd ${RESULT_HOME}
+     mv $(basename $(jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
+     rm -Rf truffleruby-${VARIANT}/legal truffleruby-${VARIANT}/lib/visualvm truffleruby-${VARIANT}/lib/jfr truffleruby-${VARIANT}/tools truffleruby-${VARIANT}/include truffleruby-${VARIANT}/lib/llvm
+     tar -I lz4 -cf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.lz4 truffleruby-${VARIANT}
+
+   upload-truffleruby: &UPLOAD_TR |
+     sftp tmp-artifacts << EOF
+       -mkdir incoming/${CI_PIPELINE_ID}/
+       put ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.lz4 incoming/${CI_PIPELINE_ID}/
+     EOF
+    
+   download-variants: &DOWNLOAD_TR |
+     sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-jvm.tar.lz4
+     sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-native-libgraal.tar.lz4
+  
+   install-on-tmpfs: &INSTALL_ON_TMP |
+     export PROJECT_FOLDER=$(pwd)
+     rm -Rf /tmp/truffleruby
+     mkdir -p /tmp/truffleruby
+     cp -R faststart /tmp/truffleruby
+     cd /tmp/truffleruby
+     tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-jvm.tar.lz4
+     tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-native-libgraal.tar.lz4
+
 # Build the VMs and run tests
 # native includes jvm-ce,
 # which is available with the --jvm flag from the laucher
@@ -11,77 +47,43 @@ build1-native-and-jvm-ce:
   stage: build
   tags: [yuria]
   script:
-    - export PROJECT_FOLDER=$(pwd)
-    - export PATH=${PROJECT_FOLDER}/bin:${PATH}
+    - *GIT_DEPS
+    - *PREP_PATH
 
     # Copy Custom Config into TruffleRuby setup
     - export VARIANT=native-libgraal
     - cp faststart/${VARIANT}.env mx.truffleruby/${VARIANT}
 
-    # build
-    - (cd ../graal && git fetch --all) || true
-    - (cd ../mx && git pull) || true
     - jt build --sforceimports --env ${VARIANT}
 
-    # package
-    - export RESULT_HOME=$(dirname $(jt --use ${VARIANT} graalvm-home))
-    - cd ${RESULT_HOME}
-    - mv $(basename $(jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
-    - rm -Rf truffleruby-${VARIANT}/legal truffleruby-${VARIANT}/lib/visualvm truffleruby-${VARIANT}/lib/jfr truffleruby-${VARIANT}/tools truffleruby-${VARIANT}/include truffleruby-${VARIANT}/lib/llvm
-    - tar -I lz4 -cf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.lz4 truffleruby-${VARIANT}
-
-    - |
-      sftp tmp-artifacts << EOF
-        -mkdir incoming/${CI_PIPELINE_ID}/
-        put ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.lz4 incoming/${CI_PIPELINE_ID}/
-      EOF
+    - *PACKAGE_TR
+    - *UPLOAD_TR
 
 build2-jvm:
   stage: build
   tags: [yuria2]
   script:
-    - export PROJECT_FOLDER=$(pwd)
-    - export PATH=${PROJECT_FOLDER}/bin:${PATH}
-    - export VARIANT=jvm
+    - *GIT_DEPS
+    - *PREP_PATH
     
-    - (cd ../graal && git fetch --all) || true
-    - (cd ../mx && git pull) || true
+    - export VARIANT=jvm
     - jt build --sforceimports --env ${VARIANT}
     
-    # test
     # Run time: 2.3min
     - jt --use ${VARIANT} test fast
     # Run time: 2sec
     - jt --use ${VARIANT} test :next
 
-    # package
-    - export RESULT_HOME=$(dirname $(jt --use ${VARIANT} graalvm-home))
-    - cd ${RESULT_HOME}
-    - mv $(basename $(jt --use ${VARIANT} graalvm-home)) truffleruby-${VARIANT}
-    - rm -Rf truffleruby-${VARIANT}/legal truffleruby-${VARIANT}/lib/visualvm truffleruby-${VARIANT}/lib/jfr truffleruby-${VARIANT}/tools truffleruby-${VARIANT}/include truffleruby-${VARIANT}/lib/llvm
-    - tar -I lz4 -cf ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.lz4 truffleruby-${VARIANT}
-
-    - |
-      sftp tmp-artifacts << EOF
-        -mkdir incoming/${CI_PIPELINE_ID}/
-        put ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.lz4 incoming/${CI_PIPELINE_ID}/
-      EOF
+    - *PACKAGE_TR
+    - *UPLOAD_TR
 
 # Run Benchmarks
 benchmark1:
   stage: benchmark
   tags: [yuria]
   script:
-    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-jvm.tar.lz4
-    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-native-libgraal.tar.lz4
-    
-    - export PROJECT_FOLDER=$(pwd)
-    - rm -Rf /tmp/truffleruby
-    - mkdir -p /tmp/truffleruby
-    - cp -R faststart /tmp/truffleruby
-    - cd /tmp/truffleruby
-    - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-jvm.tar.lz4
-    - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-native-libgraal.tar.lz4
+    - *DOWNLOAD_TR    
+    - *INSTALL_ON_TMP
     
     # back to the harddisk so that rebench can read the version details
     - cd ${PROJECT_FOLDER}/faststart
@@ -93,16 +95,8 @@ benchmark2:
   stage: benchmark
   tags: [yuria2]
   script:
-    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-jvm.tar.lz4
-    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-native-libgraal.tar.lz4
-    
-    - export PROJECT_FOLDER=$(pwd)
-    - rm -Rf /tmp/truffleruby
-    - mkdir -p /tmp/truffleruby
-    - cp -R faststart /tmp/truffleruby
-    - cd /tmp/truffleruby
-    - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-jvm.tar.lz4
-    - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-native-libgraal.tar.lz4
+    - *DOWNLOAD_TR
+    - *INSTALL_ON_TMP
     
     # back to the harddisk so that rebench can read the version details
     - cd ${PROJECT_FOLDER}/faststart
@@ -114,16 +108,8 @@ benchmark3:
   stage: benchmark
   tags: [yuria3]
   script:
-    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-jvm.tar.lz4
-    - sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-native-libgraal.tar.lz4
-    
-    - export PROJECT_FOLDER=$(pwd)
-    - rm -Rf /tmp/truffleruby
-    - mkdir -p /tmp/truffleruby
-    - cp -R faststart /tmp/truffleruby
-    - cd /tmp/truffleruby
-    - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-jvm.tar.lz4
-    - tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-native-libgraal.tar.lz4
+    - *DOWNLOAD_TR
+    - *INSTALL_ON_TMP
     
     # back to the harddisk so that rebench can read the version details
     - cd ${PROJECT_FOLDER}/faststart
@@ -146,6 +132,9 @@ full-test-run-on-jvm-ce:on-schedule:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   script:
+    - *GIT_DEPS
+    - *PREP_PATH
+
     - bin/jt build --sforceimports --env jvm-ce
     
     # Run time: 2.3min
