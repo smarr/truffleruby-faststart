@@ -127,6 +127,7 @@ report-completion:
   stage: benchmark-completion
   tags: [yuria]
   script:
+    - *GIT_FASTSTART
     - cd faststart
     - rebench --experiment="CI ID $CI_PIPELINE_ID" --report-completion rebench.conf
 
