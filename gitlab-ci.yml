@@ -13,6 +13,9 @@ stages:
      git -C ../graal fetch --all || true
      git -C ../mx pull || true
      git clone --depth=1 https://github.com/smarr/truffleruby-faststart.git faststart || true
+  
+   ensure-faststart: &GIT_FASTSTART |
+     git clone --depth=1 https://github.com/smarr/truffleruby-faststart.git faststart || true
 
    package-truffleruby: &PACKAGE_TR |
      export RESULT_HOME=$(dirname $(jt --use ${VARIANT} graalvm-home))
@@ -82,7 +85,8 @@ benchmark1:
   stage: benchmark
   tags: [yuria]
   script:
-    - *DOWNLOAD_TR    
+    - *DOWNLOAD_TR
+    - *GIT_FASTSTART
     - *INSTALL_ON_TMP
     
     # back to the harddisk so that rebench can read the version details
@@ -96,6 +100,7 @@ benchmark2:
   tags: [yuria2]
   script:
     - *DOWNLOAD_TR
+    - *GIT_FASTSTART
     - *INSTALL_ON_TMP
     
     # back to the harddisk so that rebench can read the version details
@@ -109,6 +114,7 @@ benchmark3:
   tags: [yuria3]
   script:
     - *DOWNLOAD_TR
+    - *GIT_FASTSTART
     - *INSTALL_ON_TMP
     
     # back to the harddisk so that rebench can read the version details
