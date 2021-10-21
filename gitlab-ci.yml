@@ -12,7 +12,7 @@ stages:
    ensure-git-dependencies: &GIT_DEPS |
      git -C ../graal fetch --all || true
      git -C ../mx pull || true
-     git clone --depth=1 https://git.cs.kent.ac.uk/sm951/faststart.git faststart || true
+     git clone --depth=1 https://github.com/smarr/truffleruby-faststart.git faststart || true
 
    package-truffleruby: &PACKAGE_TR |
      export RESULT_HOME=$(dirname $(jt --use ${VARIANT} graalvm-home))
