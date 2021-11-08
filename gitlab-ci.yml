@@ -95,6 +95,11 @@ benchmark1:
     - cd ${PROJECT_FOLDER}/faststart
     - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf m:yuria
     - rm -Rf /tmp/truffleruby
+  rules:
+      - changes:
+          - mx.truffleruby/suite.py
+          - src/**/*
+          - lib/**/*
 
 # Run Benchmarks
 benchmark2:
@@ -109,6 +114,11 @@ benchmark2:
     - cd ${PROJECT_FOLDER}/faststart
     - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf m:yuria2
     - rm -Rf /tmp/truffleruby
+  rules:
+      - changes:
+          - mx.truffleruby/suite.py
+          - src/**/*
+          - lib/**/*
 
 # Run Benchmarks
 benchmark3:
@@ -123,6 +133,11 @@ benchmark3:
     - cd ${PROJECT_FOLDER}/faststart
     - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf m:yuria3
     - rm -Rf /tmp/truffleruby
+  rules:
+      - changes:
+          - mx.truffleruby/suite.py
+          - src/**/*
+          - lib/**/*
 
 
 report-completion:
@@ -132,6 +147,11 @@ report-completion:
     - *GIT_FASTSTART
     - cd faststart
     - rebench --experiment="CI ID $CI_PIPELINE_ID" --report-completion rebench.conf
+  rules:
+      - changes:
+          - mx.truffleruby/suite.py
+          - src/**/*
+          - lib/**/*
 
 
 # A full CI Run, which should be scheduled, weekly or so
