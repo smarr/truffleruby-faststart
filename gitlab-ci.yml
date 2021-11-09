@@ -93,7 +93,9 @@ benchmark1:
     
     # back to the harddisk so that rebench can read the version details
     - cd ${PROJECT_FOLDER}/faststart
-    - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf m:yuria
+    - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf profile       m:yuria
+    - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf profile-large m:yuria
+    - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf benchmark     m:yuria
     - rm -Rf /tmp/truffleruby
   rules:
       - changes:
@@ -112,7 +114,9 @@ benchmark2:
     
     # back to the harddisk so that rebench can read the version details
     - cd ${PROJECT_FOLDER}/faststart
-    - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf m:yuria2
+    - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf profile       m:yuria2
+    - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf profile-large m:yuria2
+    - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf benchmark     m:yuria2
     - rm -Rf /tmp/truffleruby
   rules:
       - changes:
@@ -131,7 +135,9 @@ benchmark3:
     
     # back to the harddisk so that rebench can read the version details
     - cd ${PROJECT_FOLDER}/faststart
-    - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf m:yuria3
+    - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf profile       m:yuria3
+    - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf profile-large m:yuria3
+    - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf benchmark     m:yuria3
     - rm -Rf /tmp/truffleruby
   rules:
       - changes:
