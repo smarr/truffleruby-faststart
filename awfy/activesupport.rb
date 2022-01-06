@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 $LOAD_PATH.unshift "#{__dir__}/../activesupport/lib"
 $LOAD_PATH.unshift "#{__dir__}/../activesupport/gems/minitest-5.14.4/lib/"
 $LOAD_PATH.unshift "#{__dir__}/../activesupport/gems/concurrent-ruby-1.1.9/lib/concurrent-ruby"
