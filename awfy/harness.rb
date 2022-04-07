@@ -70,11 +70,21 @@ class Run
   end
 
   def measure(bench)
+    start_compile_total = Truffle::Graal.total_compilation_time
+    start_gc_total = GC.total_time
+
     start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC, :nanosecond)
     unless bench.inner_benchmark_loop(@inner_iterations)
       raise 'Benchmark failed with incorrect result'
     end
     end_time = Process.clock_gettime(Process::CLOCK_MONOTONIC, :nanosecond)
+
+    end_gc_total = GC.total_time
+    end_compile_total = Truffle::Graal.total_compilation_time
+
+    puts "#{@name}: GC time:      #{(end_gc_total - start_gc_total)/1000000}ms"
+    puts "#{@name}: Compile time: #{(end_compile_total - start_compile_total)}ms"
+
 
     run_time = (end_time - start_time) / 1000
     print_result(run_time)
