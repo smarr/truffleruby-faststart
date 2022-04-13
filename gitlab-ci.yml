@@ -69,7 +69,7 @@ build2-jvm:
   tags: [yuria2]
   script:
     # try to abort the job if we only try to benchmark native interpreter
-    - [ -f ./.gitlab.native-int-only ] && exit 0
+    - "[ -f ./.gitlab.native-int-only ] && exit 0"
 
     - *GIT_DEPS
     - *PREP_PATH
