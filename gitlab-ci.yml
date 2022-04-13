@@ -42,7 +42,7 @@ stages:
      mkdir -p /tmp/truffleruby
      cp -R faststart /tmp/truffleruby
      cd /tmp/truffleruby
-     tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-jvm.tar.lz4
+     [ ! -f ${PROJECT_FOLDER}/.gitlab.native-int-only ] && tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-jvm.tar.lz4
      tar -I lz4 -xf ${PROJECT_FOLDER}/truffleruby-native-libgraal.tar.lz4
 
 # Build the VMs and run tests
