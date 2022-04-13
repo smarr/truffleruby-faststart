@@ -68,6 +68,9 @@ build2-jvm:
   stage: build
   tags: [yuria2]
   script:
+    # try to abort the job if we only try to benchmark native interpreter
+    - if [ -f ./.gitlab.native-int-only ]; then exit 0; fi
+
     - *GIT_DEPS
     - *PREP_PATH
     
@@ -95,7 +98,13 @@ benchmark1:
     - cd ${PROJECT_FOLDER}/faststart
     - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf profile       m:yuria
     - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf profile-large m:yuria
-    - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf benchmark     m:yuria
+    - |
+      if [ -f ${PROJECT_FOLDER}/.gitlab.native-int-only ]
+      then
+        rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf benchmark     m:yuria e:TruffleRuby-native-interp
+      else
+        rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf benchmark     m:yuria
+      fi
     - rm -Rf /tmp/truffleruby
   rules:
       - changes:
@@ -117,7 +126,13 @@ benchmark2:
     - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf benchmark-micros
     - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf profile       m:yuria2
     - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf profile-large m:yuria2
-    - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf benchmark     m:yuria2
+    - |
+      if [ -f ${PROJECT_FOLDER}/.gitlab.native-int-only ]
+      then
+        rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf benchmark     m:yuria2 e:TruffleRuby-native-interp
+      else
+        rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf benchmark     m:yuria2
+      fi
     - rm -Rf /tmp/truffleruby
   rules:
       - changes:
@@ -139,7 +154,13 @@ benchmark3:
     - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf profile-micros
     - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf profile       m:yuria3
     - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf profile-large m:yuria3
-    - rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf benchmark     m:yuria3
+    - |
+      if [ -f ${PROJECT_FOLDER}/.gitlab.native-int-only ]
+      then
+        rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf benchmark     m:yuria3 e:TruffleRuby-native-interp
+      else
+        rebench -c --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c rebench.conf benchmark     m:yuria3
+      fi
     - rm -Rf /tmp/truffleruby
   rules:
       - changes:
