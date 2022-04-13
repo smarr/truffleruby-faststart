@@ -33,7 +33,7 @@ stages:
      EOF
     
    download-variants: &DOWNLOAD_TR |
-     sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-jvm.tar.lz4
+     [ ! -f ./.gitlab.native-int-only ] && sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-jvm.tar.lz4
      sftp tmp-artifacts:incoming/${CI_PIPELINE_ID}/truffleruby-native-libgraal.tar.lz4
   
    install-on-tmpfs: &INSTALL_ON_TMP |
@@ -69,7 +69,7 @@ build2-jvm:
   tags: [yuria2]
   script:
     # try to abort the job if we only try to benchmark native interpreter
-    - if [ -f ./.gitlab.native-int-only ]; then exit 0; fi
+    - [ -f ./.gitlab.native-int-only ] && exit 0
 
     - *GIT_DEPS
     - *PREP_PATH
