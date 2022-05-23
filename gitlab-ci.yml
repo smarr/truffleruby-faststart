@@ -28,6 +28,7 @@ stages:
 
    upload-truffleruby: &UPLOAD_TR |
      sftp tmp-artifacts << EOF
+       -mkdir incoming
        -mkdir incoming/${CI_PIPELINE_ID}/
        put ${PROJECT_FOLDER}/truffleruby-${VARIANT}.tar.lz4 incoming/${CI_PIPELINE_ID}/
      EOF
