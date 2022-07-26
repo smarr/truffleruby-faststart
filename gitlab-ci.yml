@@ -52,6 +52,8 @@ stages:
 build1-native-and-jvm-ce:
   stage: build
   tags: [yuria]
+  except:
+    - tags # don't built for tags, just branches
   script:
     - *GIT_DEPS
     - *PREP_PATH
@@ -68,6 +70,8 @@ build1-native-and-jvm-ce:
 build2-jvm:
   stage: build
   tags: [yuria2]
+  except:
+    - tags # don't built for tags, just branches
   script:
     # try to abort the job if we only try to benchmark native interpreter
     - "[ -f ./.gitlab.native-int-only ] && exit 0"
@@ -90,6 +94,8 @@ build2-jvm:
 benchmark1:
   stage: benchmark
   tags: [yuria]
+  except:
+    - tags # don't built for tags, just branches
   script:
     - *DOWNLOAD_TR
     - *GIT_FASTSTART
@@ -117,6 +123,8 @@ benchmark1:
 benchmark2:
   stage: benchmark
   tags: [yuria2]
+  except:
+    - tags # don't built for tags, just branches
   script:
     - *DOWNLOAD_TR
     - *GIT_FASTSTART
@@ -145,6 +153,8 @@ benchmark2:
 benchmark3:
   stage: benchmark
   tags: [yuria3]
+  except:
+    - tags # don't built for tags, just branches
   script:
     - *DOWNLOAD_TR
     - *GIT_FASTSTART
@@ -173,6 +183,8 @@ benchmark3:
 report-completion:
   stage: benchmark-completion
   tags: [yuria]
+  except:
+    - tags # don't built for tags, just branches
   script:
     - *GIT_FASTSTART
     - cd faststart
