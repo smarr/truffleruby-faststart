@@ -19,6 +19,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+HAS_ALLOC = RUBY_ENGINE == 'truffleruby' && Truffle::System.respond_to?(:allocated_bytes_of_current_thread)
+HAS_COMP_T = RUBY_ENGINE == 'truffleruby' && Truffle::Graal.respond_to?(:total_compilation_time)
+HAS_GC_T = GC.respond_to?(:total_time)
+
 class Benchmark
   def inner_benchmark_loop(inner_iterations)
     inner_iterations.times do
@@ -70,8 +74,9 @@ class Run
   end
 
   def measure(bench)
-    start_compile_total = Truffle::Graal.total_compilation_time
-    start_gc_total = GC.total_time
+    start_compile_total = HAS_COMP_T ? Truffle::Graal.total_compilation_time : 0
+    start_gc_total = HAS_GC_T ? GC.total_time : 0
+    start_allocated = HAS_ALLOC ? Truffle::System.allocated_bytes_of_current_thread : 0
 
     start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC, :nanosecond)
     unless bench.inner_benchmark_loop(@inner_iterations)
@@ -79,11 +84,13 @@ class Run
     end
     end_time = Process.clock_gettime(Process::CLOCK_MONOTONIC, :nanosecond)
 
-    end_gc_total = GC.total_time
-    end_compile_total = Truffle::Graal.total_compilation_time
+    end_allocated = HAS_ALLOC ? Truffle::System.allocated_bytes_of_current_thread : 0
+    end_gc_total = HAS_GC_T ? GC.total_time : 0
+    end_compile_total = HAS_COMP_T ? Truffle::Graal.total_compilation_time : 0
 
     puts "#{@name}: GC time:      #{(end_gc_total - start_gc_total)/1000000}ms"
     puts "#{@name}: Compile time: #{(end_compile_total - start_compile_total)}ms"
+    puts "#{@name}: Allocated:    #{(end_allocated - start_allocated)}bytes"
 
 
     run_time = (end_time - start_time) / 1000
