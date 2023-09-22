@@ -4,8 +4,8 @@ begin
   gem "msgpack", ">= 1.7.0"
   require "msgpack"
 rescue LoadError => error
-  warn "ActiveSupport::MessagePack requires the msgpack gem, version 1.7.0 or later. " \
-    "Please add it to your Gemfile: `gem \"msgpack\", \">= 1.7.0\"`"
+  # warn "ActiveSupport::MessagePack requires the msgpack gem, version 1.7.0 or later. " \
+  # "Please add it to your Gemfile: `gem \"msgpack\", \">= 1.7.0\"`"
   raise error
 end
 
