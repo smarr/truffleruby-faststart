@@ -3,10 +3,13 @@
 require "active_support/core_ext/module/attribute_accessors"
 require "active_support/core_ext/class/attribute"
 require "active_support/subscriber"
+require "active_support/deprecation/proxy_wrappers"
 
 module ActiveSupport
-  # <tt>ActiveSupport::LogSubscriber</tt> is an object set to consume
-  # <tt>ActiveSupport::Notifications</tt> with the sole purpose of logging them.
+  # = Active Support Log \Subscriber
+  #
+  # +ActiveSupport::LogSubscriber+ is an object set to consume
+  # ActiveSupport::Notifications with the sole purpose of logging them.
   # The log subscriber dispatches notifications to a registered object based
   # on its given namespace.
   #
@@ -15,29 +18,23 @@ module ActiveSupport
   #
   #   module ActiveRecord
   #     class LogSubscriber < ActiveSupport::LogSubscriber
+  #       attach_to :active_record
+  #
   #       def sql(event)
   #         info "#{event.payload[:name]} (#{event.duration}) #{event.payload[:sql]}"
   #       end
   #     end
   #   end
   #
-  # And it's finally registered as:
+  # ActiveRecord::LogSubscriber.logger must be set as well, but it is assigned
+  # automatically in a \Rails environment.
   #
-  #   ActiveRecord::LogSubscriber.attach_to :active_record
+  # After configured, whenever a <tt>"sql.active_record"</tt> notification is
+  # published, it will properly dispatch the event
+  # (ActiveSupport::Notifications::Event) to the +sql+ method.
   #
-  # Since we need to know all instance methods before attaching the log
-  # subscriber, the line above should be called after your
-  # <tt>ActiveRecord::LogSubscriber</tt> definition.
-  #
-  # A logger also needs to be set with <tt>ActiveRecord::LogSubscriber.logger=</tt>.
-  # This is assigned automatically in a Rails environment.
-  #
-  # After configured, whenever a <tt>"sql.active_record"</tt> notification is published,
-  # it will properly dispatch the event
-  # (<tt>ActiveSupport::Notifications::Event</tt>) to the sql method.
-  #
-  # Being an <tt>ActiveSupport::Notifications</tt> consumer,
-  # <tt>ActiveSupport::LogSubscriber</tt> exposes a simple interface to check if
+  # Being an ActiveSupport::Notifications consumer,
+  # +ActiveSupport::LogSubscriber+ exposes a simple interface to check if
   # instrumented code raises an exception. It is common to log a different
   # message in case of an error, and this can be achieved by extending
   # the previous example:
@@ -59,15 +56,24 @@ module ActiveSupport
   #     end
   #   end
   #
-  # Log subscriber also has some helpers to deal with logging and automatically
-  # flushes all logs when the request finishes
-  # (via <tt>action_dispatch.callback</tt> notification) in a Rails environment.
+  # +ActiveSupport::LogSubscriber+ also has some helpers to deal with
+  # logging. For example, ActiveSupport::LogSubscriber.flush_all! will ensure
+  # that all logs are flushed, and it is called in Rails::Rack::Logger after a
+  # request finishes.
   class LogSubscriber < Subscriber
     # Embed in a String to clear all previous ANSI sequences.
-    CLEAR   = "\e[0m"
-    BOLD    = "\e[1m"
+    CLEAR = ActiveSupport::Deprecation::DeprecatedObjectProxy.new("\e[0m", "CLEAR is deprecated! Use MODES[:clear] instead.", ActiveSupport.deprecator)
+    BOLD  = ActiveSupport::Deprecation::DeprecatedObjectProxy.new("\e[1m", "BOLD is deprecated! Use MODES[:bold] instead.", ActiveSupport.deprecator)
 
-    # Colors
+    # ANSI sequence modes
+    MODES = {
+      clear:     0,
+      bold:      1,
+      italic:    3,
+      underline: 4,
+    }
+
+    # ANSI sequence colors
     BLACK   = "\e[30m"
     RED     = "\e[31m"
     GREEN   = "\e[32m"
@@ -78,12 +84,19 @@ module ActiveSupport
     WHITE   = "\e[37m"
 
     mattr_accessor :colorize_logging, default: true
+    class_attribute :log_levels, instance_accessor: false, default: {} # :nodoc:
 
     class << self
       def logger
         @logger ||= if defined?(Rails) && Rails.respond_to?(:logger)
           Rails.logger
         end
+      end
+
+      def attach_to(...) # :nodoc:
+        result = super
+        set_event_levels
+        result
       end
 
       attr_writer :logger
@@ -101,20 +114,36 @@ module ActiveSupport
         def fetch_public_methods(subscriber, inherit_all)
           subscriber.public_methods(inherit_all) - LogSubscriber.public_instance_methods(true)
         end
+
+        def set_event_levels
+          if subscriber
+            subscriber.event_levels = log_levels.transform_keys { |k| "#{k}.#{namespace}" }
+          end
+        end
+
+        def subscribe_log_level(method, level)
+          self.log_levels = log_levels.merge(method => ::Logger.const_get(level.upcase))
+          set_event_levels
+        end
+    end
+
+    def initialize
+      super
+      @event_levels = {}
     end
 
     def logger
       LogSubscriber.logger
     end
 
-    def start(name, id, payload)
-      super if logger
+    def silenced?(event)
+      logger.nil? || logger.level > @event_levels.fetch(event, Float::INFINITY)
     end
 
-    def finish(name, id, payload)
+    def call(event)
       super if logger
     rescue => e
-      log_exception(name, e)
+      log_exception(event.name, e)
     end
 
     def publish_event(event)
@@ -122,6 +151,8 @@ module ActiveSupport
     rescue => e
       log_exception(event.name, e)
     end
+
+    attr_writer :event_levels # :nodoc:
 
   private
     %w(info debug warn error fatal unknown).each do |level|
@@ -132,15 +163,29 @@ module ActiveSupport
       METHOD
     end
 
-    # Set color by using a symbol or one of the defined constants. If a third
-    # option is set to +true+, it also adds bold to the string. This is based
-    # on the Highline implementation and will automatically append CLEAR to the
-    # end of the returned String.
-    def color(text, color, bold = false) # :doc:
+    # Set color by using a symbol or one of the defined constants. Set modes
+    # by specifying bold, italic, or underline options. Inspired by Highline,
+    # this method will automatically clear formatting at the end of the returned String.
+    def color(text, color, mode_options = {}) # :doc:
       return text unless colorize_logging
       color = self.class.const_get(color.upcase) if color.is_a?(Symbol)
-      bold  = bold ? BOLD : ""
-      "#{bold}#{color}#{text}#{CLEAR}"
+      mode = mode_from(mode_options)
+      clear = "\e[#{MODES[:clear]}m"
+      "#{mode}#{color}#{text}#{clear}"
+    end
+
+    def mode_from(options)
+      if options.is_a?(TrueClass) || options.is_a?(FalseClass)
+        ActiveSupport.deprecator.warn(<<~MSG.squish)
+          Bolding log text with a positional boolean is deprecated and will be removed
+          in Rails 7.2. Use an option hash instead (eg. `color("my text", :red, bold: true)`).
+        MSG
+        options = { bold: options }
+      end
+
+      modes = MODES.values_at(*options.compact_blank.keys)
+
+      "\e[#{modes.join(";")}m" if modes.any?
     end
 
     def log_exception(name, e)

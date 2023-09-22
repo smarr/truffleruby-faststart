@@ -6,10 +6,11 @@ require "active_support/descendants_tracker"
 
 class DescendantsTrackerTest < ActiveSupport::TestCase
   setup do
-    @original_state = ActiveSupport::DescendantsTracker.class_eval("@@direct_descendants").dup
-    @original_state.each { |k, v| @original_state[k] = v.dup }
+    if ActiveSupport::DescendantsTracker.class_variable_defined?(:@@direct_descendants)
+      @original_state = ActiveSupport::DescendantsTracker.class_variable_get(:@@direct_descendants).dup
+      @original_state.each { |k, v| @original_state[k] = v.dup }
+    end
 
-    ActiveSupport::DescendantsTracker.clear
     eval <<~RUBY
       class Parent
         extend ActiveSupport::DescendantsTracker
@@ -30,10 +31,14 @@ class DescendantsTrackerTest < ActiveSupport::TestCase
   end
 
   teardown do
-    ActiveSupport::DescendantsTracker.class_eval("@@direct_descendants").replace(@original_state)
+    if ActiveSupport::DescendantsTracker.class_variable_defined?(:@@direct_descendants)
+      ActiveSupport::DescendantsTracker.class_variable_get(:@@direct_descendants).replace(@original_state)
+    end
 
     %i(Parent Child1 Child2 Grandchild1 Grandchild2).each do |name|
-      DescendantsTrackerTest.send(:remove_const, name)
+      if DescendantsTrackerTest.const_defined?(name)
+        DescendantsTrackerTest.send(:remove_const, name)
+      end
     end
   end
 
@@ -64,31 +69,17 @@ class DescendantsTrackerTest < ActiveSupport::TestCase
     assert_equal_sets [Child1, Grandchild1, Grandchild2, Child2], Parent.descendants
   end
 
-  test ".direct_descendants" do
-    assert_equal_sets [Child1, Child2], Parent.direct_descendants
-    assert_equal_sets [Grandchild1, Grandchild2], Child1.direct_descendants
-    assert_equal_sets [], Child2.direct_descendants
-  end
-
   test ".subclasses" do
-    [Parent, Child1, Child2].each do |klass|
-      assert_equal klass.direct_descendants, klass.subclasses
-    end
+    assert_equal_sets [Child1, Child2], Parent.subclasses
+    assert_equal_sets [Grandchild1, Grandchild2], Child1.subclasses
+    assert_equal_sets [], Child2.subclasses
   end
 
-  test ".clear deletes all state" do
-    ActiveSupport::DescendantsTracker.clear
-    assert_empty ActiveSupport::DescendantsTracker.class_eval("@@direct_descendants")
-  end
-
-  test ".clear(only) deletes the given classes only" do
-    ActiveSupport::DescendantsTracker.clear(only: Set[Child2, Grandchild1])
+  test ".clear(classes) deletes the given classes only" do
+    ActiveSupport::DescendantsTracker.clear(Set[Child2, Grandchild1])
 
     assert_equal_sets [Child1, Grandchild2], Parent.descendants
     assert_equal_sets [Grandchild2], Child1.descendants
-
-    assert_equal_sets [Child1], Parent.direct_descendants
-    assert_equal_sets [Grandchild2], Child1.direct_descendants
   end
 
   private

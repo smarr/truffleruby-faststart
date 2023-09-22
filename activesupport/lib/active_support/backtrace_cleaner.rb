@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module ActiveSupport
+  # = Backtrace Cleaner
+  #
   # Backtraces often include many lines that are not relevant for the context
   # under review. This makes it hard to find the signal amongst the backtrace
   # noise, and adds debugging time. With a BacktraceCleaner, filters and
@@ -19,12 +21,12 @@ module ActiveSupport
   #   bc.add_silencer { |line| /puma|rubygems/.match?(line) } # skip any lines from puma or rubygems
   #   bc.clean(exception.backtrace) # perform the cleanup
   #
-  # To reconfigure an existing BacktraceCleaner (like the default one in Rails)
+  # To reconfigure an existing BacktraceCleaner (like the default one in \Rails)
   # and show as much data as possible, you can always call
-  # <tt>BacktraceCleaner#remove_silencers!</tt>, which will restore the
+  # BacktraceCleaner#remove_silencers!, which will restore the
   # backtrace to a pristine state. If you need to reconfigure an existing
   # BacktraceCleaner so that it does not filter or modify the paths of any lines
-  # of the backtrace, you can call <tt>BacktraceCleaner#remove_filters!</tt>
+  # of the backtrace, you can call BacktraceCleaner#remove_filters!
   # These two methods will give you a completely untouched backtrace.
   #
   # Inspired by the Quiet Backtrace gem by thoughtbot.
@@ -52,11 +54,29 @@ module ActiveSupport
     end
     alias :filter :clean
 
+    # Returns the frame with all filters applied.
+    # returns +nil+ if the frame was silenced.
+    def clean_frame(frame, kind = :silent)
+      frame = frame.to_s
+      @filters.each do |f|
+        frame = f.call(frame.to_s)
+      end
+
+      case kind
+      when :silent
+        frame unless @silencers.any? { |s| s.call(frame) }
+      when :noise
+        frame if @silencers.any? { |s| s.call(frame) }
+      else
+        frame
+      end
+    end
+
     # Adds a filter from the block provided. Each line in the backtrace will be
     # mapped against this filter.
     #
     #   # Will turn "/my/rails/root/app/models/person.rb" into "/app/models/person.rb"
-    #   backtrace_cleaner.add_filter { |line| line.gsub(Rails.root, '') }
+    #   backtrace_cleaner.add_filter { |line| line.gsub(Rails.root.to_s, '') }
     def add_filter(&block)
       @filters << block
     end
@@ -106,7 +126,7 @@ module ActiveSupport
 
       def filter_backtrace(backtrace)
         @filters.each do |f|
-          backtrace = backtrace.map { |line| f.call(line) }
+          backtrace = backtrace.map { |line| f.call(line.to_s) }
         end
 
         backtrace
@@ -114,7 +134,7 @@ module ActiveSupport
 
       def silence(backtrace)
         @silencers.each do |s|
-          backtrace = backtrace.reject { |line| s.call(line) }
+          backtrace = backtrace.reject { |line| s.call(line.to_s) }
         end
 
         backtrace
@@ -123,7 +143,7 @@ module ActiveSupport
       def noise(backtrace)
         backtrace.select do |line|
           @silencers.any? do |s|
-            s.call(line)
+            s.call(line.to_s)
           end
         end
       end

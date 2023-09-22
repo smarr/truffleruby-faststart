@@ -16,7 +16,7 @@ module Digest
     # uuid_from_hash always generates the same UUID for a given name and namespace combination.
     #
     # See RFC 4122 for details of UUID at: https://www.ietf.org/rfc/rfc4122.txt
-    def self.uuid_from_hash(hash_class, uuid_namespace, name)
+    def self.uuid_from_hash(hash_class, namespace, name)
       if hash_class == Digest::MD5 || hash_class == OpenSSL::Digest::MD5
         version = 3
       elsif hash_class == Digest::SHA1 || hash_class == OpenSSL::Digest::SHA1
@@ -24,6 +24,8 @@ module Digest
       else
         raise ArgumentError, "Expected OpenSSL::Digest::SHA1 or OpenSSL::Digest::MD5, got #{hash_class.name}."
       end
+
+      uuid_namespace = pack_uuid_namespace(namespace)
 
       hash = hash_class.new
       hash.update(uuid_namespace)
@@ -50,5 +52,19 @@ module Digest
     def self.uuid_v4
       SecureRandom.uuid
     end
+
+    def self.pack_uuid_namespace(namespace)
+      if [DNS_NAMESPACE, OID_NAMESPACE, URL_NAMESPACE, X500_NAMESPACE].include?(namespace)
+        namespace
+      else
+        match_data = namespace.match(/\A(\h{8})-(\h{4})-(\h{4})-(\h{4})-(\h{4})(\h{8})\z/)
+
+        raise ArgumentError, "Only UUIDs are valid namespace identifiers" unless match_data.present?
+
+        match_data.captures.map { |s| s.to_i(16) }.pack("NnnnnN")
+      end
+    end
+
+    private_class_method :pack_uuid_namespace
   end
 end

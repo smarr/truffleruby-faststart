@@ -77,19 +77,30 @@ class ToSentenceTest < ActiveSupport::TestCase
   end
 end
 
-class ToSTest < ActiveSupport::TestCase
+class ToFsTest < ActiveSupport::TestCase
   class TestDB
-    @@counter = 0
+    def self.reset
+      @@counter = 0
+    end
+
+    reset
+
     def id
       @@counter += 1
     end
   end
 
-  def test_to_s_db
+  setup do
+    TestDB.reset
+  end
+
+  def test_to_fs_db
     collection = [TestDB.new, TestDB.new, TestDB.new]
 
-    assert_equal "null", [].to_s(:db)
-    assert_equal "1,2,3", collection.to_s(:db)
+    assert_equal "null", [].to_fs(:db)
+    assert_equal "1,2,3", collection.to_fs(:db)
+    assert_equal "null", [].to_formatted_s(:db)
+    assert_equal "4,5,6", collection.to_formatted_s(:db)
   end
 end
 

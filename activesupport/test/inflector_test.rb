@@ -220,11 +220,21 @@ class InflectorTest < ActiveSupport::TestCase
     ].each do |camel, under, human, title|
       assert_equal(camel, ActiveSupport::Inflector.camelize(under))
       assert_equal(camel, ActiveSupport::Inflector.camelize(camel))
+      assert_not_predicate(ActiveSupport::Inflector.camelize(under), :frozen?)
+      assert_not_predicate(ActiveSupport::Inflector.camelize(camel), :frozen?)
+
       assert_equal(under, ActiveSupport::Inflector.underscore(under))
       assert_equal(under, ActiveSupport::Inflector.underscore(camel))
+      assert_not_predicate(ActiveSupport::Inflector.underscore(under), :frozen?)
+      assert_not_predicate(ActiveSupport::Inflector.underscore(camel), :frozen?)
+
       assert_equal(title, ActiveSupport::Inflector.titleize(under))
       assert_equal(title, ActiveSupport::Inflector.titleize(camel))
+      assert_not_predicate(ActiveSupport::Inflector.titleize(under), :frozen?)
+      assert_not_predicate(ActiveSupport::Inflector.titleize(camel), :frozen?)
+
       assert_equal(human, ActiveSupport::Inflector.humanize(under))
+      assert_not_predicate(ActiveSupport::Inflector.humanize(camel), :frozen?)
     end
   end
 
@@ -370,6 +380,10 @@ class InflectorTest < ActiveSupport::TestCase
     end
   end
 
+  def test_humanize_nil
+    assert_equal("", ActiveSupport::Inflector.humanize(nil))
+  end
+
   def test_humanize_without_capitalize
     UnderscoreToHumanWithoutCapitalize.each do |underscore, human|
       assert_equal(human, ActiveSupport::Inflector.humanize(underscore, capitalize: false))
@@ -469,6 +483,18 @@ class InflectorTest < ActiveSupport::TestCase
     RUBY
   end
 
+  def test_clear_acronyms_resets_to_reusable_state
+    ActiveSupport::Inflector.inflections.clear(:acronyms)
+
+    assert_empty ActiveSupport::Inflector.inflections.acronyms
+
+    ActiveSupport::Inflector.inflections do |inflect|
+      inflect.acronym "HTML"
+    end
+
+    assert_equal "HTML", "html".titleize
+  end
+
   def test_inflector_locality
     ActiveSupport::Inflector.inflections(:es) do |inflect|
       inflect.plural(/$/, "s")
@@ -512,6 +538,7 @@ class InflectorTest < ActiveSupport::TestCase
       inflect.singular(/(database)s$/i, '\1')
       inflect.uncountable("series")
       inflect.human("col_rpted_bugs", "Reported bugs")
+      inflect.acronym("HTML")
 
       inflect.clear :all
 
@@ -519,6 +546,7 @@ class InflectorTest < ActiveSupport::TestCase
       assert_empty inflect.singulars
       assert_empty inflect.uncountables
       assert_empty inflect.humans
+      assert_empty inflect.acronyms
     end
   end
 
@@ -529,6 +557,7 @@ class InflectorTest < ActiveSupport::TestCase
       inflect.singular(/(database)s$/i, '\1')
       inflect.uncountable("series")
       inflect.human("col_rpted_bugs", "Reported bugs")
+      inflect.acronym("HTML")
 
       inflect.clear
 
@@ -536,6 +565,22 @@ class InflectorTest < ActiveSupport::TestCase
       assert_empty inflect.singulars
       assert_empty inflect.uncountables
       assert_empty inflect.humans
+      assert_empty inflect.acronyms
+    end
+  end
+
+  def test_clear_all_resets_camelize_and_underscore_regexes
+    ActiveSupport::Inflector.inflections do |inflect|
+      # ensure any data is present
+      inflect.acronym("HTTP")
+      assert_equal "http_s", "HTTPS".underscore
+      assert_equal "Https", "https".camelize
+
+      inflect.clear :all
+
+      assert_empty inflect.acronyms
+      assert_equal "https", "HTTPS".underscore
+      assert_equal "Https", "https".camelize
     end
   end
 
@@ -592,7 +637,7 @@ class InflectorTest < ActiveSupport::TestCase
     end
   end
 
-  %w(plurals singulars uncountables humans acronyms).each do |scope|
+  %i(plurals singulars uncountables humans).each do |scope|
     define_method("test_clear_inflections_with_#{scope}") do
       # clear the inflections
       ActiveSupport::Inflector.inflections do |inflect|
@@ -600,5 +645,18 @@ class InflectorTest < ActiveSupport::TestCase
         assert_equal [], inflect.public_send(scope)
       end
     end
+  end
+
+  def test_clear_inflections_with_acronyms
+    ActiveSupport::Inflector.inflections do |inflect|
+      inflect.clear(:acronyms)
+      assert_equal({}, inflect.acronyms)
+    end
+  end
+
+  def test_output_is_not_frozen_even_if_input_is_frozen
+    input = "plurals"
+    assert_predicate input, :frozen?
+    assert_not_predicate ActiveSupport::Inflector.pluralize(input), :frozen?
   end
 end

@@ -2,12 +2,11 @@
 
 require "active_support/notifications/instrumenter"
 require "active_support/notifications/fanout"
-require "active_support/per_thread_registry"
 
 module ActiveSupport
-  # = Notifications
+  # = \Notifications
   #
-  # <tt>ActiveSupport::Notifications</tt> provides an instrumentation API for
+  # +ActiveSupport::Notifications+ provides an instrumentation API for
   # Ruby.
   #
   # == Instrumenters
@@ -85,7 +84,7 @@ module ActiveSupport
   #   event.payload[:exception]         # => ["ArgumentError", "Invalid value"]
   #   event.payload[:exception_object]  # => #<ArgumentError: Invalid value>
   #
-  # As the earlier example depicts, the class <tt>ActiveSupport::Notifications::Event</tt>
+  # As the earlier example depicts, the class ActiveSupport::Notifications::Event
   # is able to take the arguments as they come and provide an object-oriented
   # interface to that data.
   #
@@ -238,13 +237,19 @@ module ActiveSupport
       #
       # Raises an error if invalid event name type is passed:
       #
-      #  ActiveSupport::Notifications.subscribe(:render) {|*args| ...}
-      #  #=> ArgumentError (pattern must be specified as a String, Regexp or empty)
+      #   ActiveSupport::Notifications.subscribe(:render) {|*args| ...}
+      #   #=> ArgumentError (pattern must be specified as a String, Regexp or empty)
       #
       def subscribe(pattern = nil, callback = nil, &block)
         notifier.subscribe(pattern, callback, monotonic: false, &block)
       end
 
+      # Performs the same functionality as #subscribe, but the +start+ and
+      # +finish+ block arguments are in monotonic time instead of wall-clock
+      # time. Monotonic time will not jump forward or backward (due to NTP or
+      # Daylights Savings). Use +monotonic_subscribe+ when accuracy of time
+      # duration is important. For example, computing elapsed time between
+      # two events.
       def monotonic_subscribe(pattern = nil, callback = nil, &block)
         notifier.subscribe(pattern, callback, monotonic: true, &block)
       end
@@ -261,28 +266,13 @@ module ActiveSupport
       end
 
       def instrumenter
-        InstrumentationRegistry.instance.instrumenter_for(notifier)
-      end
-    end
-
-    # This class is a registry which holds all of the +Instrumenter+ objects
-    # in a particular thread local. To access the +Instrumenter+ object for a
-    # particular +notifier+, you can call the following method:
-    #
-    #   InstrumentationRegistry.instrumenter_for(notifier)
-    #
-    # The instrumenters for multiple notifiers are held in a single instance of
-    # this class.
-    class InstrumentationRegistry # :nodoc:
-      extend ActiveSupport::PerThreadRegistry
-
-      def initialize
-        @registry = {}
+        registry[notifier] ||= Instrumenter.new(notifier)
       end
 
-      def instrumenter_for(notifier)
-        @registry[notifier] ||= Instrumenter.new(notifier)
-      end
+      private
+        def registry
+          ActiveSupport::IsolatedExecutionState[:active_support_notifications_registry] ||= {}
+        end
     end
 
     self.notifier = Fanout.new

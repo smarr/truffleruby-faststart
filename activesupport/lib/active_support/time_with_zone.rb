@@ -8,12 +8,14 @@ require "active_support/core_ext/object/acts_like"
 require "active_support/core_ext/date_and_time/compatibility"
 
 module ActiveSupport
+  # = Active Support \Time With Zone
+  #
   # A Time-like class that can represent a time in any time zone. Necessary
   # because standard Ruby Time instances are limited to UTC and the
   # system's <tt>ENV['TZ']</tt> zone.
   #
   # You shouldn't ever need to create a TimeWithZone instance directly via +new+.
-  # Instead use methods +local+, +parse+, +at+ and +now+ on TimeZone instances,
+  # Instead use methods +local+, +parse+, +at+, and +now+ on TimeZone instances,
   # and +in_time_zone+ on Time and DateTime instances.
   #
   #   Time.zone = 'Eastern Time (US & Canada)'        # => 'Eastern Time (US & Canada)'
@@ -33,25 +35,13 @@ module ActiveSupport
   #   t.dst?                                # => true
   #   t.utc_offset                          # => -14400
   #   t.zone                                # => "EDT"
-  #   t.to_s(:rfc822)                       # => "Sun, 18 May 2008 13:27:25 -0400"
+  #   t.to_fs(:rfc822)                      # => "Sun, 18 May 2008 13:27:25 -0400"
   #   t + 1.day                             # => Mon, 19 May 2008 13:27:25.031505668 EDT -04:00
   #   t.beginning_of_year                   # => Tue, 01 Jan 2008 00:00:00.000000000 EST -05:00
   #   t > Time.utc(1999)                    # => true
   #   t.is_a?(Time)                         # => true
   #   t.is_a?(ActiveSupport::TimeWithZone)  # => true
   class TimeWithZone
-    # Report class name as 'Time' to thwart type checking.
-    def self.name
-      ActiveSupport::Deprecation.warn(<<~EOM)
-        ActiveSupport::TimeWithZone.name has been deprecated and
-        from Rails 7.1 will use the default Ruby implementation.
-        You can set `config.active_support.remove_deprecated_time_with_zone_name = true`
-        to enable the new behavior now.
-      EOM
-
-      "Time"
-    end
-
     PRECISIONS = Hash.new { |h, n| h[n] = "%FT%T.%#{n}N" }
     PRECISIONS[0] = "%FT%T"
 
@@ -78,7 +68,7 @@ module ActiveSupport
     alias_method :getutc, :utc
     alias_method :gmtime, :utc
 
-    # Returns the underlying TZInfo::TimezonePeriod.
+    # Returns the underlying +TZInfo::TimezonePeriod+.
     def period
       @period ||= time_zone.period_for_utc(@utc)
     end
@@ -202,25 +192,34 @@ module ActiveSupport
     #
     #   Time.zone.now.rfc2822  # => "Tue, 01 Jan 2013 04:51:39 +0000"
     def rfc2822
-      to_s(:rfc822)
+      to_fs(:rfc822)
     end
     alias_method :rfc822, :rfc2822
 
     # Returns a string of the object's date and time.
+    def to_s
+      "#{time.strftime("%Y-%m-%d %H:%M:%S")} #{formatted_offset(false, 'UTC')}" # mimicking Ruby Time#to_s format
+    end
+
+    # Returns a string of the object's date and time.
+    #
+    # This method is aliased to <tt>to_formatted_s</tt>.
+    #
     # Accepts an optional <tt>format</tt>:
     # * <tt>:default</tt> - default value, mimics Ruby Time#to_s format.
-    # * <tt>:db</tt> - format outputs time in UTC :db time. See Time#to_formatted_s(:db).
-    # * Any key in <tt>Time::DATE_FORMATS</tt> can be used. See active_support/core_ext/time/conversions.rb.
-    def to_s(format = :default)
+    # * <tt>:db</tt> - format outputs time in UTC :db time. See Time#to_fs(:db).
+    # * Any key in +Time::DATE_FORMATS+ can be used. See active_support/core_ext/time/conversions.rb.
+    def to_fs(format = :default)
       if format == :db
-        utc.to_s(format)
+        utc.to_fs(format)
       elsif formatter = ::Time::DATE_FORMATS[format]
         formatter.respond_to?(:call) ? formatter.call(self).to_s : strftime(formatter)
       else
-        "#{time.strftime("%Y-%m-%d %H:%M:%S")} #{formatted_offset(false, 'UTC')}" # mimicking Ruby Time#to_s format
+        # Change to to_s when deprecation is gone.
+        "#{time.strftime("%Y-%m-%d %H:%M:%S")} #{formatted_offset(false, 'UTC')}"
       end
     end
-    alias_method :to_formatted_s, :to_s
+    alias_method :to_formatted_s, :to_fs
 
     # Replaces <tt>%Z</tt> directive with +zone before passing to Time#strftime,
     # so that zone information is correct.
@@ -309,9 +308,8 @@ module ActiveSupport
     alias_method :in, :+
 
     # Subtracts an interval of time and returns a new TimeWithZone object unless
-    # the other value +acts_like?+ time. Then it will return a Float of the difference
-    # between the two times that represents the difference between the current
-    # object's time and the +other+ time.
+    # the other value +acts_like?+ time. In which case, it will subtract the
+    # other time and return the difference in seconds as a Float.
     #
     #   Time.zone = 'Eastern Time (US & Canada)' # => 'Eastern Time (US & Canada)'
     #   now = Time.zone.now # => Mon, 03 Nov 2014 00:26:28.725182881 EST -05:00
@@ -367,8 +365,8 @@ module ActiveSupport
     # Returns a new +ActiveSupport::TimeWithZone+ where one or more of the elements have
     # been changed according to the +options+ parameter. The time options (<tt>:hour</tt>,
     # <tt>:min</tt>, <tt>:sec</tt>, <tt>:usec</tt>, <tt>:nsec</tt>) reset cascadingly,
-    # so if only the hour is passed, then minute, sec, usec and nsec is set to 0. If the
-    # hour and minute is passed, then sec, usec and nsec is set to 0. The +options+
+    # so if only the hour is passed, then minute, sec, usec, and nsec is set to 0. If the
+    # hour and minute is passed, then sec, usec, and nsec is set to 0. The +options+
     # parameter takes a hash with any of these keys: <tt>:year</tt>, <tt>:month</tt>,
     # <tt>:day</tt>, <tt>:hour</tt>, <tt>:min</tt>, <tt>:sec</tt>, <tt>:usec</tt>,
     # <tt>:nsec</tt>, <tt>:offset</tt>, <tt>:zone</tt>. Pass either <tt>:usec</tt>
@@ -539,8 +537,8 @@ module ActiveSupport
 
     # Send the missing method to +time+ instance, and wrap result in a new
     # TimeWithZone with the existing +time_zone+.
-    def method_missing(sym, *args, &block)
-      wrap_with_time_zone time.__send__(sym, *args, &block)
+    def method_missing(...)
+      wrap_with_time_zone time.__send__(...)
     rescue NoMethodError => e
       raise e, e.message.sub(time.inspect, inspect).sub("Time", "ActiveSupport::TimeWithZone"), e.backtrace
     end

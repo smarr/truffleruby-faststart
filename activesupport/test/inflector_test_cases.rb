@@ -121,6 +121,7 @@ module InflectorTestCases
     "ApplicationController" => "application_controller",
     "Area51Controller"      => "area51_controller",
     "AppCDir"               => "app_c_dir",
+    "Accountsv2N2Test"      => "accountsv2_n2_test",
   }
 
   UnderscoreToLowerCamel = {
@@ -248,6 +249,8 @@ module InflectorTestCases
   UnderscoreToHuman = {
     "employee_salary" => "Employee salary",
     "employee_id"     => "Employee",
+    "employee id"     => "Employee id",
+    "employee id etc" => "Employee id etc",
     "underground"     => "Underground",
     "_id"             => "Id",
     "_external_id"    => "External"
@@ -258,6 +261,8 @@ module InflectorTestCases
     "employee_id"                => "Employee id",
     "employee_id_something_else" => "Employee id something else",
     "underground"               => "Underground",
+    "employee id"               => "Employee id",
+    "employee id etc"           => "Employee id etc",
     "_id"                       => "Id",
     "_external_id"              => "External id"
   }

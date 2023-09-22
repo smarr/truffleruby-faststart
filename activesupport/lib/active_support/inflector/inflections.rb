@@ -7,6 +7,8 @@ module ActiveSupport
   module Inflector
     extend self
 
+    # = Active Support \Inflections
+    #
     # A singleton instance of this class is yielded by Inflector.inflections,
     # which can then be used to specify additional inflection rules. If passed
     # an optional locale, rules for other languages can be specified. The
@@ -222,15 +224,24 @@ module ActiveSupport
       # Clears the loaded inflections within a given scope (default is
       # <tt>:all</tt>). Give the scope as a symbol of the inflection type, the
       # options are: <tt>:plurals</tt>, <tt>:singulars</tt>, <tt>:uncountables</tt>,
-      # <tt>:humans</tt>.
+      # <tt>:humans</tt>, <tt>:acronyms</tt>.
       #
       #   clear :all
       #   clear :plurals
       def clear(scope = :all)
         case scope
         when :all
-          @plurals, @singulars, @uncountables, @humans = [], [], Uncountables.new, []
-        else
+          clear(:acronyms)
+          clear(:plurals)
+          clear(:singulars)
+          clear(:uncountables)
+          clear(:humans)
+        when :acronyms
+          @acronyms = {}
+          define_acronym_regex_patterns
+        when :uncountables
+          @uncountables = Uncountables.new
+        when :plurals, :singulars, :humans
           instance_variable_set "@#{scope}", []
         end
       end

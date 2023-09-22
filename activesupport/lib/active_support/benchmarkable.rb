@@ -4,6 +4,7 @@ require "active_support/core_ext/benchmark"
 require "active_support/core_ext/hash/keys"
 
 module ActiveSupport
+  # = \Benchmarkable
   module Benchmarkable
     # Allows you to measure the execution time of a block in a template and
     # records the result to the log. Wrap this block around expensive operations
@@ -34,13 +35,13 @@ module ActiveSupport
     #  <% benchmark 'Process data files', level: :info, silence: true do %>
     #    <%= expensive_and_chatty_files_operation %>
     #  <% end %>
-    def benchmark(message = "Benchmarking", options = {})
+    def benchmark(message = "Benchmarking", options = {}, &block)
       if logger
         options.assert_valid_keys(:level, :silence)
         options[:level] ||= :info
 
         result = nil
-        ms = Benchmark.ms { result = options[:silence] ? logger.silence { yield } : yield }
+        ms = Benchmark.ms { result = options[:silence] ? logger.silence(&block) : yield }
         logger.public_send(options[:level], "%s (%.1fms)" % [ message, ms ])
         result
       else

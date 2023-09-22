@@ -4,9 +4,11 @@ require_relative "abstract_unit"
 require "openssl"
 require "active_support/time"
 require "active_support/json"
-require_relative "metadata/shared_metadata_tests"
+require_relative "messages/message_codec_tests"
 
 class MessageEncryptorTest < ActiveSupport::TestCase
+  include MessageCodecTests
+
   class JSONSerializer
     def dump(value)
       ActiveSupport::JSON.encode(value)
@@ -83,6 +85,41 @@ class MessageEncryptorTest < ActiveSupport::TestCase
     assert_not_verified([iv,  message] * bad_encoding_characters)
   end
 
+  test "supports URL-safe encoding when using authenticated encryption" do
+    encryptor = ActiveSupport::MessageEncryptor.new(@secret, url_safe: true, cipher: "aes-256-gcm")
+
+    # Because encrypted data appears random, we cannot control whether it will
+    # contain bytes that _would_ be encoded as non-URL-safe characters (i.e. "+"
+    # or "/") if `url_safe: true` were broken.  Therefore, to make our test
+    # falsifiable, we use a large string so that the encrypted data will almost
+    # certainly contain such bytes.
+    data = "x" * 10001
+    message = encryptor.encrypt_and_sign(data)
+
+    assert_equal data, encryptor.decrypt_and_verify(message)
+    assert_equal message, URI.encode_www_form_component(message)
+  end
+
+  test "supports URL-safe encoding when using unauthenticated encryption" do
+    encryptor = ActiveSupport::MessageEncryptor.new(@secret, url_safe: true, cipher: "aes-256-cbc")
+
+    # When using unauthenticated encryption, messages are double encoded: once
+    # when encrypting and once again when signing with a MessageVerifier.  The
+    # 1st encode eliminates the possibility of a 6-bit aligned occurrence of
+    # `0b111110` or `0b111111`, which the 2nd encode _would_ map to a
+    # non-URL-safe character (i.e. "+" or "/") if `url_safe: true` were broken.
+    # Therefore, to ensure our test is falsifiable, we also assert that the
+    # message payload _would_ have padding characters (i.e. "=") if
+    # `url_safe: true` were broken.
+    data = 1
+    message = encryptor.encrypt_and_sign(data)
+
+    assert_equal data, encryptor.decrypt_and_verify(message)
+    assert_equal message, URI.encode_www_form_component(message)
+    assert_not_equal 0, message.rpartition("--").first.length % 4,
+      "Unable to assert that the message payload is unpadded, because it does not require padding"
+  end
+
   def test_aead_mode_encryption
     encryptor = ActiveSupport::MessageEncryptor.new(@secret, cipher: "aes-256-gcm")
     message = encryptor.encrypt_and_sign(@data)
@@ -115,101 +152,16 @@ class MessageEncryptorTest < ActiveSupport::TestCase
     assert_equal "Ruby on Rails", encryptor.decrypt_and_verify(encrypted_message)
   end
 
-  def test_rotating_secret
-    old_message = ActiveSupport::MessageEncryptor.new(secrets[:old], cipher: "aes-256-gcm").encrypt_and_sign("old")
-
+  def test_inspect_does_not_show_secrets
     encryptor = ActiveSupport::MessageEncryptor.new(@secret, cipher: "aes-256-gcm")
-    encryptor.rotate secrets[:old]
-
-    assert_equal "old", encryptor.decrypt_and_verify(old_message)
-  end
-
-  def test_rotating_serializer
-    old_message = ActiveSupport::MessageEncryptor.new(secrets[:old], cipher: "aes-256-gcm", serializer: JSON).
-      encrypt_and_sign({ ahoy: :hoy })
-
-    encryptor = ActiveSupport::MessageEncryptor.new(@secret, cipher: "aes-256-gcm", serializer: JSON)
-    encryptor.rotate secrets[:old]
-
-    assert_equal({ "ahoy" => "hoy" }, encryptor.decrypt_and_verify(old_message))
-  end
-
-  def test_rotating_aes_cbc_secrets
-    old_encryptor = ActiveSupport::MessageEncryptor.new(secrets[:old], "old sign", cipher: "aes-256-cbc")
-    old_message = old_encryptor.encrypt_and_sign("old")
-
-    encryptor = ActiveSupport::MessageEncryptor.new(@secret)
-    encryptor.rotate secrets[:old], "old sign", cipher: "aes-256-cbc"
-
-    assert_equal "old", encryptor.decrypt_and_verify(old_message)
-  end
-
-  def test_multiple_rotations
-    older_message = ActiveSupport::MessageEncryptor.new(secrets[:older], "older sign").encrypt_and_sign("older")
-    old_message = ActiveSupport::MessageEncryptor.new(secrets[:old], "old sign").encrypt_and_sign("old")
-
-    encryptor = ActiveSupport::MessageEncryptor.new(@secret)
-    encryptor.rotate secrets[:old], "old sign"
-    encryptor.rotate secrets[:older], "older sign"
-
-    assert_equal "new",   encryptor.decrypt_and_verify(encryptor.encrypt_and_sign("new"))
-    assert_equal "old",   encryptor.decrypt_and_verify(old_message)
-    assert_equal "older", encryptor.decrypt_and_verify(older_message)
-  end
-
-  def test_on_rotation_is_called_and_returns_modified_messages
-    older_message = ActiveSupport::MessageEncryptor.new(secrets[:older], "older sign").encrypt_and_sign({ encoded: "message" })
-
-    encryptor = ActiveSupport::MessageEncryptor.new(@secret)
-    encryptor.rotate secrets[:old]
-    encryptor.rotate secrets[:older], "older sign"
-
-    rotated = false
-    message = encryptor.decrypt_and_verify(older_message, on_rotation: proc { rotated = true })
-
-    assert_equal({ encoded: "message" }, message)
-    assert rotated
-  end
-
-  def test_on_rotation_can_be_passed_at_the_constructor_level
-    older_message = ActiveSupport::MessageEncryptor.new(secrets[:older], "older sign").encrypt_and_sign({ encoded: "message" })
-
-    rotated = rotated = false  # double assigning to suppress "assigned but unused variable" warning
-    encryptor = ActiveSupport::MessageEncryptor.new(@secret, on_rotation: proc { rotated = true })
-    encryptor.rotate secrets[:older], "older sign"
-
-    assert_changes(:rotated, from: false, to: true) do
-      message = encryptor.decrypt_and_verify(older_message)
-
-      assert_equal({ encoded: "message" }, message)
-    end
-  end
-
-  def test_on_rotation_option_takes_precedence_over_the_one_given_in_constructor
-    older_message = ActiveSupport::MessageEncryptor.new(secrets[:older], "older sign").encrypt_and_sign({ encoded: "message" })
-
-    rotated = rotated = false  # double assigning to suppress "assigned but unused variable" warning
-    encryptor = ActiveSupport::MessageEncryptor.new(@secret, on_rotation: proc { rotated = true })
-    encryptor.rotate secrets[:older], "older sign"
-
-    assert_changes(:rotated, from: false, to: "Yes") do
-      message = encryptor.decrypt_and_verify(older_message, on_rotation: proc { rotated = "Yes" })
-
-      assert_equal({ encoded: "message" }, message)
-    end
-  end
-
-  def test_with_rotated_metadata
-    old_message = ActiveSupport::MessageEncryptor.new(secrets[:old], cipher: "aes-256-gcm").
-      encrypt_and_sign("metadata", purpose: :rotation)
-
-    encryptor = ActiveSupport::MessageEncryptor.new(@secret, cipher: "aes-256-gcm")
-    encryptor.rotate secrets[:old]
-
-    assert_equal "metadata", encryptor.decrypt_and_verify(old_message, purpose: :rotation)
+    assert_match(/\A#<ActiveSupport::MessageEncryptor:0x[0-9a-f]+>\z/, encryptor.inspect)
   end
 
   private
+    def make_codec(**options)
+      ActiveSupport::MessageEncryptor.new(@secret, **options)
+    end
+
     def assert_aead_not_decrypted(encryptor, value)
       assert_raise(ActiveSupport::MessageEncryptor::InvalidMessage) do
         encryptor.decrypt_and_verify(value)
@@ -223,7 +175,7 @@ class MessageEncryptorTest < ActiveSupport::TestCase
     end
 
     def assert_not_verified(value)
-      assert_raise(ActiveSupport::MessageVerifier::InvalidSignature) do
+      assert_raise(ActiveSupport::MessageEncryptor::InvalidMessage) do
         @encryptor.decrypt_and_verify(value)
       end
     end
@@ -236,39 +188,5 @@ class MessageEncryptorTest < ActiveSupport::TestCase
       bits = ::Base64.strict_decode64(base64_string)
       bits.reverse!
       ::Base64.strict_encode64(bits)
-    end
-end
-
-class MessageEncryptorMetadataTest < ActiveSupport::TestCase
-  include SharedMessageMetadataTests
-
-  setup do
-    @secret    = SecureRandom.random_bytes(32)
-    @encryptor = ActiveSupport::MessageEncryptor.new(@secret, **encryptor_options)
-  end
-
-  private
-    def generate(message, **options)
-      @encryptor.encrypt_and_sign(message, **options)
-    end
-
-    def parse(data, **options)
-      @encryptor.decrypt_and_verify(data, **options)
-    end
-
-    def encryptor_options; {} end
-end
-
-class MessageEncryptorMetadataMarshalTest < MessageEncryptorMetadataTest
-  private
-    def encryptor_options
-      { serializer: Marshal }
-    end
-end
-
-class MessageEncryptorMetadataJSONTest < MessageEncryptorMetadataTest
-  private
-    def encryptor_options
-      { serializer: MessageEncryptorTest::JSONSerializer.new }
     end
 end

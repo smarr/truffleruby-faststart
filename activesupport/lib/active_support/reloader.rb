@@ -4,7 +4,8 @@ require "active_support/execution_wrapper"
 require "active_support/executor"
 
 module ActiveSupport
-  #--
+  # = Active Support \Reloader
+  #
   # This class defines several callbacks:
   #
   #   to_prepare -- Run once at application startup, and also from
@@ -58,7 +59,7 @@ module ActiveSupport
       prepare!
     end
 
-    def self.run! # :nodoc:
+    def self.run!(reset: false) # :nodoc:
       if check!
         super
       else
@@ -67,9 +68,16 @@ module ActiveSupport
     end
 
     # Run the supplied block as a work unit, reloading code as needed
-    def self.wrap
-      executor.wrap do
-        super
+    def self.wrap(**kwargs)
+      return yield if active?
+
+      executor.wrap(**kwargs) do
+        instance = run!
+        begin
+          yield
+        ensure
+          instance.complete!
+        end
       end
     end
 

@@ -101,7 +101,7 @@ class TimeWithZoneTest < ActiveSupport::TestCase
     with_zone = ActiveSupport::TimeWithZone.new(nil, ActiveSupport::TimeZone["Hawaii"], local)
 
     assert_equal local.nsec, with_zone.nsec
-    assert_equal with_zone.nsec, 999999999
+    assert_equal 999999999, with_zone.nsec
   end
 
   def test_strftime
@@ -133,16 +133,21 @@ class TimeWithZoneTest < ActiveSupport::TestCase
     assert_equal "1999-12-31 19:00:00 -0500", @twz.to_s
   end
 
-  def test_to_formatted_s
-    assert_equal "1999-12-31 19:00:00 -0500", @twz.to_formatted_s
+  def test_to_fs
+    assert_equal "1999-12-31 19:00:00 -0500", @twz.to_fs
   end
 
-  def test_to_s_db
-    assert_equal "2000-01-01 00:00:00", @twz.to_s(:db)
+  def test_to_fs_db
+    assert_equal "2000-01-01 00:00:00", @twz.to_fs(:db)
+    assert_equal "2000-01-01 00:00:00", @twz.to_formatted_s(:db)
   end
 
-  def test_to_s_inspect
-    assert_equal "1999-12-31 19:00:00.000000000 -0500", @twz.to_s(:inspect)
+  def test_to_fs_inspect
+    assert_equal "1999-12-31 19:00:00.000000000 -0500", @twz.to_fs(:inspect)
+  end
+
+  def test_to_fs_not_existent
+    assert_equal "1999-12-31 19:00:00 -0500", @twz.to_fs(:not_existent)
   end
 
   def test_xmlschema
@@ -187,7 +192,7 @@ class TimeWithZoneTest < ActiveSupport::TestCase
     EOF
 
     # TODO: Remove assertion in Rails 7.1
-    assert_not_deprecated do
+    assert_not_deprecated(ActiveSupport.deprecator) do
       assert_equal(yaml, @twz.to_yaml)
     end
   end
@@ -203,7 +208,7 @@ class TimeWithZoneTest < ActiveSupport::TestCase
     EOF
 
     # TODO: Remove assertion in Rails 7.1
-    assert_not_deprecated do
+    assert_not_deprecated(ActiveSupport.deprecator) do
       assert_equal(yaml, { "twz" => @twz }.to_yaml)
     end
   end
@@ -574,13 +579,6 @@ class TimeWithZoneTest < ActiveSupport::TestCase
     assert_kind_of ActiveSupport::TimeWithZone, @twz
   end
 
-  def test_class_name
-    # TODO: Remove assertion in Rails 7.1 and change expected value
-    assert_deprecated("ActiveSupport::TimeWithZone.name has been deprecated") do
-      assert_equal "Time", ActiveSupport::TimeWithZone.name
-    end
-  end
-
   def test_method_missing_with_time_return_value
     assert_instance_of ActiveSupport::TimeWithZone, @twz.months_since(1)
     assert_equal Time.utc(2000, 1, 31, 19, 0, 0), @twz.months_since(1).time
@@ -628,6 +626,12 @@ class TimeWithZoneTest < ActiveSupport::TestCase
     time = @twz.time
     def time.foo; "bar"; end
     assert_equal "bar", @twz.foo
+  end
+
+  def test_method_missing_works_with_kwargs
+    time = @twz.time
+    def time.method_with_kwarg(foo:); foo; end
+    assert_equal "bar", @twz.method_with_kwarg(foo: "bar")
   end
 
   def test_date_part_value_methods
@@ -1073,12 +1077,10 @@ class TimeWithZoneTest < ActiveSupport::TestCase
   end
 
   def test_no_method_error_has_proper_context
-    rubinius_skip "Error message inconsistency"
-
     e = assert_raises(NoMethodError) {
       @twz.this_method_does_not_exist
     }
-    assert_match "undefined method `this_method_does_not_exist' for Fri, 31 Dec 1999 19:00:00.000000000 EST -05:00:ActiveSupport::TimeWithZone", e.message
+    assert_match(/undefined method `this_method_does_not_exist' for.*ActiveSupport::TimeWithZone/, e.message)
     assert_no_match "rescue", e.backtrace.first
   end
 end
@@ -1205,13 +1207,11 @@ class TimeWithZoneMethodsForTimeAndDateTimeTest < ActiveSupport::TestCase
 
   def test_time_zone_setter_is_thread_safe
     Time.use_zone "Paris" do
-      t1 = Thread.new { Time.zone = "Alaska" }.join
-      t2 = Thread.new { Time.zone = "Hawaii" }.join
-      assert t1.stop?, "Thread 1 did not finish running"
-      assert t2.stop?, "Thread 2 did not finish running"
+      t1 = Thread.new { Time.zone = "Alaska"; Time.zone }
+      t2 = Thread.new { Time.zone = "Hawaii"; Time.zone }
       assert_equal ActiveSupport::TimeZone["Paris"], Time.zone
-      assert_equal ActiveSupport::TimeZone["Alaska"], t1[:time_zone]
-      assert_equal ActiveSupport::TimeZone["Hawaii"], t2[:time_zone]
+      assert_equal ActiveSupport::TimeZone["Alaska"], t1.value
+      assert_equal ActiveSupport::TimeZone["Hawaii"], t2.value
     end
   end
 
