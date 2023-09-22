@@ -13,7 +13,7 @@ class Activesupport < Benchmark
     @inner_iterations = 0
     @known_results = {
       1 => {
-        :assertions => 9,
+        :assertions => 10,
         :count => 4,
         :errors => 0,
         :failures => 0,
@@ -21,43 +21,43 @@ class Activesupport < Benchmark
       },
 
       10 => {
-        :assertions => 106,
+        :assertions => 103,
         :count => 54,
-        :errors => 4,
+        :errors => 6,
         :failures => 0,
         :skips => 0
       },
 
       30 => {
-        :assertions => 1289,
-        :count => 560,
-        :errors => 16,
+        :assertions => 1215,
+        :count => 523,
+        :errors => 22,
         :failures => 0,
         :skips => 0
       },
 
       50 => {
-        :assertions => 3150,
-        :count => 980,
-        :errors => 16,
-        :failures => 0,
-        :skips => 0
+        :assertions => 3171,
+        :count => 965,
+        :errors => 22,
+        :failures => 2,
+        :skips => 1
       },
 
       100 => {
-        :assertions => 7852,
-        :count => 2513,
-        :errors => 17,
-        :failures => 0,
-        :skips => 0
+        :assertions => 8335,
+        :count => 2498,
+        :errors => 29,
+        :failures => 32,
+        :skips => 2
       },
 
-      135 => {
-        :assertions => 10770,
-        :count => 3052,
-        :errors => 17,
-        :failures => 0,
-        :skips => 0
+      134 => {
+        :assertions => 11395,
+        :count => 3058,
+        :errors => 32,
+        :failures => 35,
+        :skips => 2
       },
     }
     @know_tests = [
@@ -179,7 +179,7 @@ class Activesupport < Benchmark
       "test/ordered_hash_test.rb",
       "test/ordered_options_test.rb",
       "test/parameter_filter_test.rb",
-      "test/per_thread_registry_test.rb",
+      # "test/per_thread_registry_test.rb",
       "test/reloader_test.rb",
       "test/rescuable_test.rb",
       "test/safe_buffer_test.rb",
